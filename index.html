@@ -904,6 +904,58 @@ input[type=range].om2-slider::-webkit-slider-thumb {
     </main>
 
     <script id="main-app-logic">
+        /* --- 定位：约 1186 行 --- */
+const UsageTracker = {
+    data: { rpm: 0, tpm: 0, rpd: 0, lastReset: Date.now() },
+    init() {
+        const saved = localStorage.getItem('GeekMatrix_Usage');
+        const today = new Date().toDateString();
+        if(saved) {
+            const parsed = JSON.parse(saved);
+            if(parsed.date === today) this.data.rpd = parsed.rpd;
+        }
+        setInterval(() => { this.data.rpm = 0; this.data.tpm = 0; this.updateUI(); }, 60000);
+        this.updateUI();
+    },
+    track(payload) {
+        this.data.rpm++;
+        this.data.rpd++;
+        // 🚀 精度微调：系数调整为 3.5
+        const estimatedTokens = JSON.stringify(payload).length / 3.5;
+        this.data.tpm += Math.floor(estimatedTokens);
+        localStorage.setItem('GeekMatrix_Usage', JSON.stringify({
+            rpd: this.data.rpd, date: new Date().toDateString()
+        }));
+        // 🚀 审计日志：输出至控制台 (F12)
+        console.log("Tokens Tracked:", estimatedTokens);
+        this.updateUI();
+    },
+    updateUI() {
+        const rpmEl = document.getElementById('stat-rpm');
+        const tpmEl = document.getElementById('stat-tpm');
+        const rpdEl = document.getElementById('stat-rpd');
+        const modeEl = document.getElementById('stat-mode');
+        const statsGroup = document.getElementById('stat-stats-group');
+        if(rpmEl) rpmEl.innerText = this.data.rpm;
+        if(tpmEl) tpmEl.innerText = (this.data.tpm / 1000).toFixed(1) + 'K';
+        if(rpdEl) rpdEl.innerText = this.data.rpd;
+        
+        const toggle = document.getElementById('api-mode-toggle');
+        const isApiMode = toggle ? toggle.checked : false;
+        const hasKey = !!(document.getElementById('custom-api-key')?.value.trim() || localStorage.getItem('GeekMatrix_CustomKey'));
+        const realApiActive = isApiMode && hasKey;
+        
+        if(modeEl) {
+            modeEl.innerText = `模式: ${ realApiActive ? '自有旗舰API' : '预览沙盒算力' }`;
+            const dot = modeEl.previousElementSibling;
+            if(dot) dot.className = realApiActive ? "w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" : "w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse";
+        }
+        // 🚀 染色联动：API 模式显黑，沙盒模式显绿
+        if(statsGroup) {
+            statsGroup.style.color = realApiActive ? "var(--text-primary)" : "var(--color-green)";
+        }
+    }
+};
         // 🚀 核心替换：智能读取 API Key (优先用用户自填，没有则用系统默认)
         function getActiveApiKey() {
             const isIframe = window.self !== window.top; // 判断是否在沙盒内
@@ -916,11 +968,15 @@ input[type=range].om2-slider::-webkit-slider-thumb {
         }
 
         // 保存用户填写的 Key 到本地缓存
-        function saveCustomKey() {
-            const val = document.getElementById('custom-api-key').value.trim();
-            localStorage.setItem('GeekMatrix_CustomKey', val);
-            showToast(val ? "✅ 自有 API Key 已缓存至本地！" : "🧹 已清除自定义 API Key");
-        }
+/* --- 定位：约 1251 行 --- */
+function saveCustomKey() {
+    const val = document.getElementById('custom-api-key').value.trim();
+    const toggle = document.getElementById('api-mode-toggle').checked;
+    localStorage.setItem('GeekMatrix_CustomKey', val);
+    localStorage.setItem('GeekMatrix_ApiToggle', toggle); // 🚀 持久化开关状态
+    if(window.UsageTracker) window.UsageTracker.updateUI(); // 🚀 强制 UI 实时刷新颜色
+    showToast(toggle ? (val ? "🚀 已切换至自有 API 模式" : "⚠️ API 已开启但 Key 为空") : "🍃 已回退至沙盒默认模式");
+}
         let excelCsvData = "";
         // // MODIFY_START: 满血重铸 V5.36 完整架构级别的 RULES 与 CONFIG 指令矩阵，解除压缩
         const RULES = {
@@ -3635,31 +3691,33 @@ const OM2_APIModule = {
         return JSON.parse(result.candidates[0].content.parts[0].text);
     },
 
-    async generateImageByReference(referenceDataUrl, prompt) {
-        if (!referenceDataUrl) throw new Error("缺失参考垫图，生图请求拦截");
-        
-        const currentKey = typeof getActiveApiKey === 'function' ? getActiveApiKey() : "";
-        if (currentKey) {
-            throw new Error("🚨 架构风控：本地自有 Key 暂无 Google 图像重绘大模型权限。请清空顶部 Key 返回沙盒执行。");
-        }
-        
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${OM2_CONFIG.models.imageGen}:generateContent?key=${currentKey}`;
-        const payload = {
-            contents: [{
-                role: "user",
-                parts: [
-                    { inlineData: { mimeType: "image/jpeg", data: OM2_UIUtils.stripBase64Prefix(referenceDataUrl) } },
-                    { text: prompt }
-                ]
-            }],
-            generationConfig: { responseModalities: ['TEXT', 'IMAGE'] } 
-        };
-        
-        const result = await this.fetchWithRetry(url, payload);
-        const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-        if (!imagePart) throw new Error("生图大模型未返回有效图像编码");
-        return `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
-    },
+/* --- 请确认 OM2_APIModule 中的生图方法已更新为以下解锁版 --- */
+async generateImageByReference(referenceDataUrl, prompt) {
+    if (!referenceDataUrl) throw new Error("缺失参考垫图，生图请求拦截");
+    const currentKey = getActiveApiKey();
+    
+    // 🚀 解锁 Tier 1 权限：支持本地 Key 调用生图模型
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${currentKey}`;
+    
+    const payload = {
+        contents: [{
+            role: "user",
+            parts: [
+                { inlineData: { mimeType: "image/jpeg", data: referenceDataUrl.split(',')[1] } },
+                { text: prompt }
+            ]
+        }],
+        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] } 
+    };
+    
+    if (window.UsageTracker) window.UsageTracker.track(payload);
+    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    if (!res.ok) throw new Error(`API 异常: ${res.status}`);
+    const result = await res.json();
+    const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+    if (!imagePart) throw new Error("生图大模型未返回有效图像编码");
+    return `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
+},
 
 async generateDesignSpec(imageDataUrl, preGenCopy, preGenTranslation, imageContext = "") {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${OM2_CONFIG.models.text}:generateContent?key=${getActiveApiKey()}`;
@@ -5482,14 +5540,20 @@ function syncOldThumbnails() {
             <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
             <span id="stat-mode">模式: 预览沙盒</span>
         </div>
-        <div class="flex gap-3 border-l border-[var(--border-color)] pl-3">
-            <span>RPM: <b id="stat-rpm" class="text-[var(--text-primary)]">0</b> <span class="opacity-40">/ 150</span></span>
-            <span>TPM: <b id="stat-tpm" class="text-[var(--text-primary)]">0</b> <span class="opacity-40">/ 2M</span></span>
-            <span>RPD: <b id="stat-rpd" class="text-[var(--text-primary)]">0</b> <span class="opacity-40">/ 1K</span></span>
-        </div>
-    </div>
-    <div class="flex items-center gap-2 opacity-60">
-        <span>ESTIMATED PAYLOAD TRACKER V1.0</span>
+<!-- 🔍 确认此位置：约 2118 行 -->
+<div class="flex items-center gap-1">
+    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
+    <span id="stat-mode">模式: 预览沙盒</span>
+</div>
+<!-- 🚀 目标修改项：增加了 id="stat-stats-group" -->
+<div class="flex gap-3 border-l border-[var(--border-color)] pl-3 transition-colors duration-300" id="stat-stats-group">
+    <span>RPM: <b id="stat-rpm" class="transition-colors">0</b> <span class="opacity-40">/ 150</span></span>
+    <span>TPM: <b id="stat-tpm" class="transition-colors">0</b> <span class="opacity-40">/ 2M</span></span>
+    <span>RPD: <b id="stat-rpd" class="transition-colors">0</b> <span class="opacity-40">/ 1K</span></span>
+</div>
+<!-- 下方代码 -->
+<div class="flex items-center gap-2 opacity-60">
+    <span>ESTIMATED PAYLOAD TRACKER V2.2 | TIER 1 UNLOCKED</span>
         <span id="stat-latency" class="text-blue-500">PING: --ms</span>
     </div>
 </div>
