@@ -1,0 +1,2547 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20260402_V5.57.PRO | 极客智控满血版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/PptxGenJS/libs/pptxgen.bundle.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" crossorigin="anonymous"></script>
+    
+    <style>
+        /* Apple-like Typography & Design Tokens */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --bg-body: #f5f5f7;
+            --bg-glass: rgba(255, 255, 255, 0.75);
+            --bg-glass-heavy: rgba(255, 255, 255, 0.95);
+            --bg-input: rgba(0, 0, 0, 0.03);
+            --bg-input-focus: #ffffff;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --text-muted: #a1a1a6;
+            --border-color: rgba(0, 0, 0, 0.1);
+            --border-focus: #0071e3;
+            --shadow-glass: 0 4px 24px rgba(0, 0, 0, 0.04);
+            --color-blue: #0071e3;
+            --color-green: #2e8b57;
+            --color-red: #d93025;
+            --color-orange: #f56100;
+            --color-purple: #8e44ad;
+            --color-teal: #008080;
+            --table-header-bg: #fbfbfd;
+            --table-row-hover: #f5f5f7;
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #000000;
+            --bg-glass: rgba(28, 28, 30, 0.75);
+            --bg-glass-heavy: rgba(28, 28, 30, 0.95);
+            --bg-input: rgba(255, 255, 255, 0.05);
+            --bg-input-focus: #1c1c1e;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        body { font-family: 'Inter', -apple-system, sans-serif; background-color: var(--bg-body); color: var(--text-primary); transition: background-color 0.3s ease; -webkit-font-smoothing: antialiased; }
+        .tab-content, .output-wrapper { display: none; opacity: 0; transition: opacity 0.4s ease; }
+        .tab-content.active, .output-wrapper.active { display: flex; opacity: 1; }
+        .apple-glass { background: var(--bg-glass); backdrop-filter: blur(24px); border: 1px solid var(--border-color); box-shadow: var(--shadow-glass); border-radius: 16px; }
+        .apple-glass-heavy { background: var(--bg-glass-heavy); backdrop-filter: blur(40px); border-bottom: 1px solid var(--border-color); }
+        .apple-input { background-color: var(--bg-input); border: 1px solid transparent; padding: 0.6rem 0.8rem; border-radius: 10px; font-size: 0.8125rem; outline: none; transition: all 0.2s; color: var(--text-primary); width: 100%; }
+        .apple-input:focus { background-color: var(--bg-input-focus); border-color: var(--border-focus); box-shadow: 0 0 0 3px rgba(0, 113, 227, 0.1); }
+        .apple-btn { font-weight: 600; padding: 0.6rem 1rem; border-radius: 10px; font-size: 0.8125rem; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; border: none; }
+        .apple-btn:active { transform: scale(0.97); }
+        .apple-btn-primary { background-color: var(--color-blue); color: #ffffff; }
+        .apple-btn-secondary { background-color: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-color); }
+        
+        .apple-nav-container { display: flex; gap: 8px; align-items: stretch; justify-content: flex-start; width: 100%; flex-wrap: wrap; }
+        .apple-nav-btn { flex: 1; padding: 8px 12px; font-size: 11.5px; border-radius: 8px; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); color: var(--text-secondary); font-weight: 600; background: var(--bg-input); border: 1px solid var(--border-color); min-width: 80px; text-align: center; display: flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1.2; }
+        .apple-nav-btn:hover { background: rgba(0, 113, 227, 0.05); color: var(--color-blue); border-color: var(--color-blue); }
+        .apple-nav-btn.active { background: var(--color-blue); color: #ffffff; border-color: var(--color-blue); box-shadow: 0 4px 12px rgba(0, 113, 227, 0.3); }
+
+        .btn-orange { background-color: var(--color-orange); color: white; }
+        .btn-green { background-color: var(--color-green); color: white; }
+        .btn-purple { background-color: var(--color-purple); color: white; }
+        .btn-teal { background-color: var(--color-teal); color: white; }
+
+        .markdown-body table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.8125rem; margin: 1rem 0; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+        .markdown-body th, .markdown-body td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); }
+        .markdown-body th { background-color: var(--table-header-bg); font-weight: 600; }
+        .markdown-body pre { background-color: #1d1d1f; color: #f5f5f7; padding: 1rem; border-radius: 12px; overflow-x: auto; margin-bottom: 1rem; border: 1px solid #333; }
+        .loader { border: 2.5px solid var(--border-color); border-top: 2.5px solid var(--color-blue); border-radius: 50%; width: 16px; height: 16px; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden relative">
+
+    <canvas id="matrix-canvas" class="fixed inset-0 w-full h-full z-0 pointer-events-none opacity-0 transition-opacity duration-1000" style="transform: scaleX(-1);"></canvas>
+
+    <div id="toast" class="fixed top-8 left-1/2 transform -translate-x-1/2 bg-gray-900/90 text-white px-5 py-2.5 rounded-full shadow-2xl z-[100] transition-all duration-300 opacity-0 pointer-events-none text-sm font-medium flex items-center">
+        <span id="toast-text">提示信息</span>
+    </div>
+
+    <div id="image-modal" class="fixed inset-0 z-[999] hidden flex items-center justify-center bg-black/85 backdrop-blur-md opacity-0 transition-opacity duration-300" onclick="closeImageModal()">
+        <img id="image-modal-content" class="max-w-[90vw] max-h-[90vh] object-contain rounded-xl shadow-2xl scale-95 transition-transform duration-300" src="">
+        <button class="absolute top-6 right-6 text-white bg-white/10 hover:bg-white/20 rounded-full p-2.5 backdrop-blur-xl transition-colors border border-white/20" onclick="closeImageModal()">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+    </div>
+
+    <div class="h-10 apple-glass-heavy flex items-center justify-between px-6 text-[11px] font-semibold text-secondary shrink-0 z-30 relative border-b border-[var(--border-color)]">
+        <div class="flex items-center gap-6 overflow-hidden">
+            <span class="text-[10px] uppercase tracking-widest opacity-60 shrink-0">Omni Links</span>
+            <div class="flex items-center gap-4 whitespace-nowrap overflow-x-auto no-scrollbar">
+                <a href="https://erp.lingxing.com/erp/home" target="_blank" class="hover:text-[var(--color-blue)] transition-colors">领星 ERP</a>
+                <a href="https://erp.hongruidi.com/login?redirect=%2Foper%2FproSel" target="_blank" class="hover:text-[var(--color-blue)] transition-colors">鸿瑞迪 ERP</a>
+                <a href="https://www.sellersprite.com" target="_blank" class="hover:text-[var(--color-blue)] transition-colors">卖家精灵</a>
+                <a href="https://172-16-0-2.nashrd.direct.quickconnect.cn:5001" target="_blank" class="hover:text-[var(--color-blue)] transition-colors">NAS 共享盘</a>
+            </div>
+
+            <div class="h-4 w-px bg-[var(--border-color)] mx-1"></div>
+
+            <div class="flex items-center bg-[var(--bg-input)] rounded-full px-2.5 py-0.5 gap-2 border border-[var(--border-color)] shrink-0 shadow-inner">
+                <div class="flex items-center gap-1">
+                    <span class="opacity-40">语言:</span>
+                    <select id="m1-lang" class="bg-transparent text-[var(--color-blue)] font-bold outline-none cursor-pointer border-none text-[10.5px]">
+                        <option value="德语">德语(DE)</option>
+                        <option value="英语">英语(EN)</option>
+                        <option value="法语">法语(FR)</option>
+                    </select>
+                </div>
+                <span class="opacity-10 text-[12px]">|</span>
+                <div class="flex items-center gap-1">
+                    <span class="opacity-40">国家:</span>
+                    <select id="m1-country" class="bg-transparent text-[var(--color-blue)] font-bold outline-none cursor-pointer border-none text-[10.5px]">
+                        <option value="德国">德国</option>
+                        <option value="美国">美国</option>
+                        <option value="英国">英国</option>
+                    </select>
+                </div>
+                <span class="opacity-10 text-[12px]">|</span>
+                <div class="flex items-center gap-1">
+                    <span class="opacity-40">品牌:</span>
+                    <input type="text" id="m1-brand" list="brand-options" class="bg-transparent text-[var(--color-blue)] font-bold outline-none border-none text-[10.5px] w-[80px] min-w-[80px] placeholder:text-[var(--text-muted)]" placeholder="可选/输入">
+                    <datalist id="brand-options">
+                        <option value="IUSOT"></option>
+                        <option value="VZU"></option>
+                    </datalist>
+                </div>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-4 shrink-0">
+            <div class="flex items-center bg-[var(--bg-input)] rounded-full px-2 py-0.5 border border-[var(--border-color)] relative shadow-sm">
+                <select id="logistics-provider" class="bg-transparent text-[10px] outline-none text-[var(--text-primary)] font-bold cursor-pointer mr-1 border-r border-[var(--border-color)] pr-1">
+                    <option value="https://tracking.nextsls.com/trace?app=5ec22ae23aff9708d6375f71">空运查询</option>
+                    <option value="https://jiedep.nextsls.com/tracking/app#/tracking">捷德供应链</option>
+                    <option value="http://szfhgj.jiyunamei.com:5902/track/ViewTrack">运件追踪</option>
+                </select>
+                <input type="text" id="logistics-number" placeholder="单号..." class="bg-transparent text-[10px] w-20 outline-none text-[var(--text-primary)] px-1 placeholder-[var(--text-muted)]">
+                <button onclick="trackLogistics()" class="text-[var(--color-blue)] hover:scale-110 ml-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg></button>
+            </div>
+            <div class="flex items-center bg-[var(--bg-input)] rounded-full px-2.5 py-0.5 border border-[var(--border-color)]">
+                <span id="active-engine-text" class="text-[10px] text-[var(--color-purple)] font-bold mr-2 tracking-tighter">✨ 智能路由已就绪</span>
+                <button onclick="toggleTheme()" class="hover:opacity-70 text-[12px]">🌙</button>
+            </div>
+            <div id="sys-clock" class="font-mono text-[10px] text-[var(--text-muted)] w-32 text-right hidden lg:block"></div>
+        </div>
+    </div>
+
+    <header class="h-16 apple-glass-heavy flex items-center shrink-0 z-20 relative">
+        <div class="container mx-auto px-6 w-full flex items-center justify-between gap-4">
+            <div class="flex items-center shrink-0">
+                 <button onclick="toggleViewMode()" id="view-mode-btn" class="text-[var(--text-secondary)] hover:text-[var(--color-blue)] bg-[var(--bg-input)] p-2.5 rounded-lg border border-[var(--border-color)] transition-colors shadow-sm" title="切换视图模式">
+                    <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                </button>
+            </div>
+            
+            <nav class="apple-nav-container flex-1 mr-4 no-scrollbar justify-center" id="top-collection-nav">
+                <button onclick="switchCollection('new')" id="btn-col-new" class="apple-nav-btn active !bg-[var(--color-blue)] !text-white !border-[var(--color-blue)] shadow-md px-6 text-[13px] tracking-wide">📦 新品 LISTING</button>
+                <button onclick="switchCollection('old')" id="btn-col-old" class="apple-nav-btn px-6 text-[13px] tracking-wide">🔄 老品优化</button>
+            </nav>
+            
+            <div class="flex items-center gap-3 shrink-0">
+                <div class="flex items-center bg-[var(--bg-input)] rounded-lg p-1 border border-[var(--border-color)] shadow-inner">
+                    <select id="unified-export-type" class="bg-transparent border-none text-[var(--text-primary)] text-[11px] font-medium outline-none cursor-pointer pl-2 pr-1">
+                        <option value="source">源码备份 (.html)</option>
+                        <option value="blueprint">底层指令 (.md)</option>
+                        <option value="excel">全维表格 (.xlsx)</option>
+                        <option value="ppt">全案企划 (.pptx)</option>
+                    </select>
+                    <button onclick="executeUnifiedExport()" class="apple-btn apple-btn-primary !py-1 !px-4 text-[11px] ml-1 shadow-sm hover:scale-105">下载</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="subnav-new" class="collection-subnav w-full bg-[var(--bg-glass)] border-b border-[var(--border-color)] px-6 py-2 shrink-0 z-10 transition-all flex justify-center backdrop-blur-md shadow-sm">
+        <nav class="apple-nav-container container mx-auto no-scrollbar max-w-4xl">
+            <button onclick="switchTab('mod1')" id="btn-mod1" class="apple-nav-btn active">图像解析</button>
+            <button onclick="switchTab('mod2')" id="btn-mod2" class="apple-nav-btn">A10 文案</button>
+            <button onclick="switchTab('mod3')" id="btn-mod3" class="apple-nav-btn">视觉图需</button>
+            <button onclick="switchTab('mod4')" id="btn-mod4" class="apple-nav-btn">Ai 垫图</button>
+            <button onclick="switchTab('mod5')" id="btn-mod5" class="apple-nav-btn">QA 矩阵</button>
+            <button onclick="switchTab('mod6')" id="btn-mod6" class="apple-nav-btn">视频脚本</button>
+        </nav>
+    </div>
+    
+    <div id="subnav-old" class="collection-subnav hidden w-full bg-[var(--bg-glass)] border-b border-[var(--border-color)] px-6 py-2 shrink-0 z-10 transition-all flex justify-center backdrop-blur-md shadow-sm">
+        <nav class="apple-nav-container container mx-auto no-scrollbar max-w-4xl">
+            <button onclick="switchTab('old-mod1')" id="btn-old-mod1" class="apple-nav-btn active">数据解析与文案优化</button>
+            <button onclick="switchTab('old-mod2')" id="btn-old-mod2" class="apple-nav-btn">图片优化</button>
+        </nav>
+    </div>
+
+    <main class="flex-1 overflow-hidden p-6 container mx-auto min-h-0 relative z-10 flex">
+        
+        <!-- ======================= 新品工作区 ======================= -->
+        <div id="workspace-new" class="collection-workspace flex gap-6 w-full h-full active">
+            <div class="w-[380px] shrink-0 flex flex-col gap-5 apple-glass p-5 overflow-y-auto h-full shadow-lg" id="control-panel">
+                <div id="mod1-inputs" class="tab-content active flex-col space-y-3 h-full">
+                    <div class="font-bold text-[14px] flex items-center border-b border-[var(--border-color)] pb-3 shrink-0">✨ 图像解析与全局特征注入</div>
+                    <div class="flex-1 overflow-y-auto flex flex-col gap-3 pr-2">
+                        <div class="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] shrink-0">
+                            <label class="block text-[11px] font-bold mb-2">1. 产品原图上传 (可多选)</label>
+                            <input type="file" id="m1-image" accept="image/*" multiple class="text-[10px]" onchange="syncThumbnails()">
+                            <div id="m1-thumbnails" class="flex flex-wrap gap-2 mt-2"></div>
+                        </div>
+                        <div class="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] shrink-0">
+                            <label class="block text-[11px] font-bold mb-2 text-[var(--color-purple)]">2. 竞品参考图上传 (可多选)</label>
+                            <input type="file" id="m1-comp-images" accept="image/*" multiple class="text-[10px]" onchange="syncThumbnails()">
+                            <div id="m1-comp-thumbnails" class="flex flex-wrap gap-2 mt-2"></div>
+                        </div>
+                        <div class="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] shrink-0">
+                            <label class="block text-[11px] font-bold mb-2 text-[var(--color-green)]">3. 竞品词库与评论数据 (.xlsx/.csv)</label>
+                            <input type="file" id="m1-comp-excel" accept=".xlsx, .xls, .csv" multiple class="w-full text-[10px]" onchange="handleKeywordUpload(event)">
+                        </div>
+                        <div class="flex flex-col shrink-0">
+                            <label class="text-[10px] font-bold text-[var(--text-secondary)] mb-1 uppercase">4. 粘贴竞品标题、五点与参数</label>
+                            <textarea id="m1-comp-info" class="apple-input h-20 resize-none text-[11px]" placeholder="在此粘贴竞品Listing源数据..."></textarea>
+                        </div>
+                        <div class="flex flex-col shrink-0">
+                            <label class="text-[10px] font-bold text-[var(--text-secondary)] mb-1 uppercase">5. 全局基础简述 (含SKU/名称)</label>
+                            <textarea id="m1-vars" class="apple-input h-20 resize-none text-[12px] leading-relaxed" placeholder="例: SKU: Garlic-001, 名称: 304不锈钢压蒜器..."></textarea>
+                        </div>
+                        <div class="flex flex-col shrink-0">
+                            <label class="text-[10px] font-bold text-[var(--color-orange)] mb-1 uppercase">表2 缺失补充/修正 (选填)</label>
+                            <textarea id="m1-supplement" class="apple-input h-16 resize-none text-[11px] bg-orange-50/10 border-orange-100/20" placeholder="在此输入特征修正指令..."></textarea>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 shrink-0 pt-2">
+                        <button onclick="runModule1(false)" class="apple-btn apple-btn-primary flex-1" id="btn-run-m1">✨ 执行全域自动化解析</button>
+                        <button onclick="runModule1(true)" class="apple-btn btn-orange flex-1" id="btn-update-m1">✨ 补全更新</button>
+                    </div>
+                </div>
+
+                <div id="mod2-inputs" class="tab-content flex-col space-y-4 h-full">
+                    <div class="font-bold text-[14px] flex items-center border-b border-[var(--border-color)] pb-3 shrink-0">✨ A10 引擎与对冲文案</div>
+                    <div class="flex-1 flex flex-col gap-3 min-h-0">
+                        <div class="flex-1 flex flex-col min-h-0">
+                            <label class="text-[10px] font-bold text-[var(--text-secondary)] mb-1 uppercase">底层特征包裹 (自动同步)</label>
+                            <textarea id="m2-global-data" class="apple-input flex-1 resize-none text-[10px] bg-gray-100/50 cursor-not-allowed border-[var(--border-color)]" readonly placeholder="等待模块一解析同步..."></textarea>
+                        </div>
+                        <div class="h-24 flex flex-col shrink-0">
+                            <label class="text-[10px] font-bold text-[var(--color-orange)] mb-1 uppercase">文案确认补充/微调 (选填)</label>
+                            <textarea id="m2-supplement" class="apple-input flex-1 resize-none text-[11px] bg-orange-50/10 border-orange-100/20" placeholder="在此输入文案微调指令..."></textarea>
+                        </div>
+                    </div>
+                    <div class="pt-1 shrink-0">
+                        <button onclick="runModule2(false)" class="apple-btn btn-green w-full py-3 shadow-md" id="btn-run-m2">✨ 模块二：A10 智能文案大表</button>
+                    </div>
+                </div>
+
+                <div id="mod3-inputs" class="tab-content flex-col space-y-4 h-full">
+                    <div class="font-bold text-[14px] flex items-center border-b border-[var(--border-color)] pb-3 shrink-0">✨ 视觉执行清单下达</div>
+                    <div class="flex-1 flex flex-col min-h-0">
+                        <label class="text-[10px] font-bold text-[var(--text-secondary)] mb-1 uppercase">1-7图规划包裹 (自动同步)</label>
+                        <textarea id="m3-gem2-pkg" class="apple-input flex-1 resize-none font-mono text-[10px] leading-tight bg-gray-50/50 cursor-not-allowed border-[var(--border-color)]" readonly placeholder="等待 A10 文案逻辑同步..."></textarea>
+                    </div>
+                    <div class="flex flex-col gap-2 shrink-0 pt-1">
+                        <button onclick="runModule3()" class="apple-btn btn-purple w-full text-white py-3 shadow-md" style="background-color: var(--color-purple)" id="btn-run-m3">✨ 模块三：视觉执行清单</button>
+                        <button onclick="generateMainImage()" class="apple-btn apple-btn-secondary w-full hover:border-[var(--color-purple)] hover:text-[var(--color-purple)] flex items-center justify-center" id="btn-gen-main-img">
+                            ✨ 智能重绘新品 1:1 白底图
+                        </button>
+                    </div>
+                    <div id="m3-main-img-output" class="shrink-0 w-full hidden mt-2 text-center animate-fade-in"></div>
+                </div>
+
+                <div id="mod4-inputs" class="tab-content flex-col space-y-4 h-full">
+                    <div class="font-bold text-[14px] flex items-center border-b border-[var(--border-color)] pb-3 shrink-0">✨ AI 垫图裂变工坊</div>
+                    <div class="flex flex-row gap-3 flex-1 min-h-0">
+                        <div class="w-1/2 flex flex-col p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] h-full overflow-hidden">
+                            <label class="block text-[11px] font-bold mb-2 text-[var(--color-teal)] shrink-0">已同步特征图库</label>
+                            <div id="m4-inherited-thumbnails" class="flex flex-wrap gap-1.5 mt-1 overflow-y-auto content-start flex-1"></div>
+                        </div>
+                        <div class="w-1/2 flex flex-col h-full">
+                            <label class="text-[10px] font-bold text-[var(--text-secondary)] mb-1 uppercase tracking-widest shrink-0">全域智控包裹 (自动同步)</label>
+                            <textarea id="m4-gem2-pkg" class="apple-input flex-1 resize-none font-mono text-[9px] leading-tight bg-gray-50/50 cursor-not-allowed border-[var(--border-color)]" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="pt-1 shrink-0">
+                        <button onclick="runModule4()" class="apple-btn btn-teal w-full py-3 shadow-md" id="btn-run-m4">✨ 模块四：Ai 垫图重绘矩阵</button>
+                    </div>
+                </div>
+                
+                <div id="mod5-inputs" class="tab-content flex-col space-y-4 h-full">
+                    <div class="font-bold text-[14px] flex items-center border-b border-[var(--border-color)] pb-3 shrink-0">✨ 拟人化 QA 矩阵</div>
+                    <div class="flex-1 flex flex-col gap-3 min-h-0">
+                        <div class="h-32 flex flex-col shrink-0">
+                            <label class="text-[10px] font-bold text-[var(--text-secondary)] mb-1 uppercase">底层特征包裹 (自动同步)</label>
+                            <textarea id="m5-gem2-pkg" class="apple-input flex-1 resize-none text-[10px] bg-gray-100/50 cursor-not-allowed border-[var(--border-color)]" readonly></textarea>
+                        </div>
+                        <div class="flex-1 flex flex-col">
+                            <label class="text-[10px] font-bold text-[var(--text-secondary)] mb-1 uppercase">定制 QA 偏好</label>
+                            <textarea id="m5-qa-focus" class="apple-input flex-1 resize-none text-[12px]" placeholder="例如：重点强调 304 材质防锈..."></textarea>
+                        </div>
+                    </div>
+                    <button onclick="runModule5()" class="apple-btn btn-orange w-full py-3 shrink-0" id="btn-run-m5">✨ 生成 QA 矩阵</button>
+                </div>
+
+                <div id="mod6-inputs" class="tab-content flex-col space-y-4 h-full">
+                    <div class="font-bold text-[14px] flex items-center border-b border-[var(--border-color)] pb-3 shrink-0">✨ 视频脚本运镜指令</div>
+                    <div class="flex-1 flex flex-col gap-3 min-h-0">
+                        <div class="flex-1 flex flex-col">
+                            <label class="text-[10px] font-bold text-[var(--text-secondary)] mb-1 uppercase">全域特征包裹 (自动同步)</label>
+                            <textarea id="m6-gem2-pkg" class="apple-input flex-1 resize-none text-[10px] bg-gray-100/50 cursor-not-allowed border-[var(--border-color)]" readonly></textarea>
+                        </div>
+                    </div>
+                    <button onclick="runModule6()" class="apple-btn bg-pink-500 text-white w-full py-3 shrink-0" id="btn-run-m6">✨ 生成 8秒视频 Prompt</button>
+                </div>
+            </div>
+
+            <div class="flex-1 apple-glass flex flex-col h-full overflow-hidden shadow-2xl relative" id="output-panel">
+                <div id="mod1-output-wrapper" class="output-wrapper active flex-col h-full w-full">
+                    <div class="bg-[var(--bg-glass-heavy)] border-b border-[var(--border-color)] px-6 py-4 flex justify-between items-center shrink-0 z-10">
+                        <h3 class="font-bold text-[13px] flex items-center">✨ 模块一：特征脱水大表</h3>
+                        <button onclick="copyOutputText('mod1-output')" class="text-xs text-blue-600 hover:underline">📋 复制</button>
+                    </div>
+                    <div id="mod1-output" class="p-8 overflow-y-auto flex-1 markdown-body select-text relative"><div class="flex flex-col items-center justify-center h-full text-[var(--text-muted)] opacity-50"><p>等待执行特征解析</p></div></div>
+                </div>
+
+                <div id="mod2-output-wrapper" class="output-wrapper flex-col h-full w-full">
+                    <div class="bg-[var(--bg-glass-heavy)] border-b border-[var(--border-color)] px-6 py-4 flex justify-between items-center shrink-0 z-10">
+                        <h3 class="font-bold text-[13px] flex items-center">✨ 模块二：A10 智能文案大表</h3>
+                        <button onclick="copyOutputText('mod2-output')" class="text-xs text-blue-600 hover:underline">📋 复制</button>
+                    </div>
+                    <div id="mod2-output" class="p-8 overflow-y-auto flex-1 markdown-body select-text relative"><div class="flex flex-col items-center justify-center h-full text-[var(--text-muted)] opacity-50"><p>等待执行 A10 文案</p></div></div>
+                </div>
+
+                <div id="mod3-output-wrapper" class="output-wrapper flex-col h-full w-full">
+                    <div class="bg-[var(--bg-glass-heavy)] border-b border-[var(--border-color)] px-6 py-4 flex justify-between items-center shrink-0 z-10">
+                        <h3 class="font-bold text-[13px] flex items-center">✨ 模块三：视觉执行清单</h3>
+                        <button onclick="copyOutputText('mod3-output')" class="text-xs text-blue-600 hover:underline">📋 复制</button>
+                    </div>
+                    <div id="mod3-output" class="p-8 overflow-y-auto flex-1 markdown-body select-text relative"><div class="flex flex-col items-center justify-center h-full text-[var(--text-muted)] opacity-50"><p>等待执行视觉规划</p></div></div>
+                </div>
+
+                <div id="mod4-output-wrapper" class="output-wrapper flex-col h-full w-full">
+                    <div class="bg-[var(--bg-glass-heavy)] border-b border-[var(--border-color)] px-6 py-4 flex justify-between items-center shrink-0 z-10">
+                        <h3 class="font-bold text-[13px] flex items-center">✨ 模块四：Ai 垫图重绘矩阵</h3>
+                        <div class="flex gap-2">
+                            <button onclick="downloadAllImages()" class="text-xs text-[var(--color-teal)] hover:underline font-bold">📥 批量保存生成的垫图</button>
+                            <button onclick="copyOutputText('mod4-output')" class="text-xs text-blue-600 hover:underline">📋 复制</button>
+                        </div>
+                    </div>
+                    <div id="mod4-output" class="p-8 overflow-y-auto flex-1 markdown-body select-text relative"><div class="flex flex-col items-center justify-center h-full text-[var(--text-muted)] opacity-50"><p>等待执行 Ai 垫图分析</p></div></div>
+                </div>
+
+                <div id="mod5-output-wrapper" class="output-wrapper flex-col h-full w-full">
+                    <div class="bg-[var(--bg-glass-heavy)] border-b border-[var(--border-color)] px-6 py-4 flex justify-between items-center shrink-0 z-10">
+                        <h3 class="font-bold text-[13px] flex items-center">✨ 模块五：拟人化 QA 矩阵</h3>
+                        <button onclick="copyOutputText('mod5-output')" class="text-xs text-blue-600 hover:underline">📋 复制</button>
+                    </div>
+                    <div id="mod5-output" class="p-8 overflow-y-auto flex-1 markdown-body select-text relative"><div class="flex flex-col items-center justify-center h-full text-[var(--text-muted)] opacity-50"><p>等待执行 QA 种草</p></div></div>
+                </div>
+
+                <div id="mod6-output-wrapper" class="output-wrapper flex-col h-full w-full">
+                    <div class="bg-[var(--bg-glass-heavy)] border-b border-[var(--border-color)] px-6 py-4 flex justify-between items-center shrink-0 z-10">
+                        <h3 class="font-bold text-[13px] flex items-center">✨ 模块六：8秒视频运镜指令</h3>
+                        <button onclick="copyOutputText('mod6-output')" class="text-xs text-blue-600 hover:underline">📋 复制</button>
+                    </div>
+                    <div id="mod6-output" class="p-8 overflow-y-auto flex-1 markdown-body select-text relative"><div class="flex flex-col items-center justify-center h-full text-[var(--text-muted)] opacity-50"><p>等待生成视频 Prompt</p></div></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ======================= 老品工作区 ======================= -->
+        <div id="workspace-old" class="collection-workspace hidden gap-6 w-full h-full">
+            <div class="w-[380px] shrink-0 flex flex-col gap-5 apple-glass p-5 overflow-y-auto h-full shadow-lg" id="old-control-panel">
+                
+                <div id="old-mod1-inputs" class="tab-content active flex-col space-y-3 h-full">
+                    <div class="font-bold text-[14px] flex items-center border-b border-[var(--border-color)] pb-3 shrink-0">📈 老品数据深度解析优化</div>
+                    
+                    <div class="flex-1 overflow-y-auto flex flex-col gap-3 pr-2">
+                        <div class="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] shrink-0">
+                            <label class="block text-[11px] font-bold mb-2 text-[var(--color-blue)]">1. 当前在线主图原图上传 (可多选)</label>
+                            <input type="file" id="old-m1-image" accept="image/*" multiple class="text-[10px]" onchange="syncOldThumbnails()">
+                            <div id="old-m1-thumbnails" class="flex flex-wrap gap-2 mt-2 empty:hidden"></div>
+                        </div>
+                        
+                        <div class="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] shrink-0">
+                            <label class="block text-[11px] font-bold mb-2 text-[var(--color-green)]">2. 评论表 & 竞品词库上传 (.xlsx/.csv)</label>
+                            <input type="file" id="old-m1-excel" accept=".xlsx, .xls, .csv" multiple class="w-full text-[10px]" onchange="handleOldKeywordUpload(event)">
+                        </div>
+
+                        <div class="flex flex-col shrink-0">
+                            <label class="text-[10px] font-bold text-[var(--color-purple)] mb-1 uppercase tracking-wider">3. 详情页源码粘贴框 (自动提取)</label>
+                            <textarea id="old-m1-source-code" class="apple-input h-10 resize-none text-[11px]" placeholder="在此粘贴亚马逊详情页源码 (CTRL+U)..." oninput="extractAmazonSource()"></textarea>
+                        </div>
+
+                        <div class="flex flex-col shrink-0">
+                            <label class="text-[10px] font-bold text-[var(--text-secondary)] mb-1 uppercase tracking-wider">4. 当前标题与五点 (审核用)</label>
+                            <textarea id="old-m1-current-copy" class="apple-input h-12 resize-none text-[11px]" placeholder="将自动接收源码提取的数据..."></textarea>
+                        </div>
+
+                        <div class="flex gap-2 shrink-0 items-stretch mt-1">
+                            <div class="flex-1 flex flex-col">
+                                <label class="text-[10px] font-bold text-[var(--color-orange)] mb-1 uppercase tracking-wider">5. 用户补充 (二次审核与重写)</label>
+                                <textarea id="old-m1-supplement" class="apple-input h-14 resize-none text-[11px]" placeholder="在此输入补充要求，如：把卖点改为XXX，或增加环保材质描述..."></textarea>
+                            </div>
+                            <button onclick="updateOldModule1()" class="apple-btn btn-orange w-20 shadow-md text-[10px] px-1 flex-shrink-0 flex flex-col items-center justify-center leading-tight hover:scale-105 transition-transform" id="btn-update-old-m1">
+                                <span class="text-[14px] mb-0.5">✨</span>
+                                融入补充<br>二次重写
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 shrink-0">
+                        <button onclick="runOldModule1()" class="apple-btn apple-btn-primary w-full py-3 shadow-md" id="btn-run-old-m1">✨ 启动全维优化审计</button>
+                    </div>
+                </div>
+
+              <!-- // MODIFY_START: 替换老品图片优化的输入控制面板 -->
+<style>
+    .om2-mode-zoom { cursor: zoom-in; }
+    .om2-mode-draw { cursor: crosshair; }
+    input[type=range].om2-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--color-purple); cursor: pointer; }
+</style>
+
+<div id="old-mod2-inputs" class="tab-content flex-col space-y-3 h-full">
+    <div class="font-bold text-[14px] flex items-center border-b border-[var(--border-color)] pb-3 shrink-0">📸 老品图片诊断与生图重构</div>
+    
+    <div class="flex-1 overflow-y-auto flex flex-col gap-3 pr-2">
+        <div class="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] shrink-0">
+            <label class="block text-[11px] font-bold mb-2 text-[var(--color-blue)]">1. 参考图片上传 (可多选)</label>
+            <div class="border-2 border-dashed border-[var(--border-color)] rounded-lg p-4 text-center cursor-pointer hover:border-[var(--color-blue)] hover:bg-blue-50/10 transition-colors" onclick="document.getElementById('om2_fileInput').click()">
+                <p class="text-[10px] text-[var(--text-secondary)]">点击选取图片 (支持多张)</p>
+                <input type="file" id="om2_fileInput" multiple accept="image/png, image/jpeg, image/webp" class="hidden" onchange="OM2_ImageModule.handleUpload(event)">
+            </div>
+            <div id="om2_thumbnailContainer" class="flex flex-wrap gap-2 mt-2 empty:hidden"></div>
+        </div>
+
+        <div class="p-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-input)] flex-1 flex flex-col min-h-[200px]">
+            <label class="block text-[11px] font-bold mb-2 text-[var(--color-purple)]">2. Listing 核心文案</label>
+            <div class="flex flex-col gap-2 flex-1">
+                <textarea id="om2_listingTitle" class="apple-input h-20 resize-none text-[11px] leading-relaxed" placeholder="在此粘贴 Amazon Listing 标题..."></textarea>
+                <textarea id="om2_listingBullets" class="apple-input flex-1 resize-none text-[11px] leading-relaxed" placeholder="在此粘贴 Amazon Listing 五点描述..."></textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="pt-2 shrink-0">
+        <button onclick="OM2_AnalysisModule.execute()" class="apple-btn btn-purple w-full py-3 shadow-md" id="btn-run-old-m2">✨ 执行大模型诊断与策略生成</button>
+    </div>
+</div>
+<!-- // MODIFY_END -->
+
+            <div class="flex-1 apple-glass apple-panel flex flex-col h-full overflow-hidden shadow-2xl relative" id="old-output-panel">
+                <div id="old-mod1-output-wrapper" class="output-wrapper active flex-col h-full w-full">
+                    <div class="bg-[var(--bg-glass-heavy)] border-b border-[var(--border-color)] px-6 py-3 flex justify-between items-center shrink-0 z-10">
+                        <div class="flex items-center gap-3 overflow-hidden">
+                            <h3 class="font-bold text-[13px] flex items-center text-[var(--color-blue)] whitespace-nowrap">📈 老品全维诊断优化报告</h3>
+                            <div class="hidden lg:flex items-center text-[10px] text-[var(--text-secondary)] bg-orange-50/30 border border-orange-200/50 px-2 py-1 rounded-md" title="高级指令">
+                                <svg class="w-3.5 h-3.5 mr-1 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                ⚠️ 架构提醒：老品文案更新需保持继承性，执行“微创手术级”优化，严防大幅改动导致权重掉落。
+                            </div>
+                        </div>
+                        <button onclick="copyOutputText('old-mod1-output')" class="text-xs text-blue-600 hover:underline shrink-0 ml-2">📋 复制</button>
+                    </div>
+                    <!-- ================= OM2 专属滚动条样式 (防全局污染) ================= -->
+<style>
+    .om2-custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+    .om2-custom-scrollbar::-webkit-scrollbar-track { background: var(--bg-input); border-radius: 4px; }
+    .om2-custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    .om2-custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--color-blue); }
+</style>
+
+<!-- ================= 老品图片优化 专属输出展示区 ================= -->
+<div id="old-mod2-output-wrapper" class="output-wrapper flex-col h-full w-full bg-[#f8fafc] text-slate-800">
+    <div class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center shrink-0 z-10">
+        <div class="flex items-center gap-3 overflow-hidden">
+            <h3 class="font-bold text-[14px] flex items-center text-slate-800 whitespace-nowrap">📸 诊断结果与生图工作流</h3>
+        </div>
+    </div>
+    
+    <div class="flex-1 overflow-y-auto om2-custom-scrollbar p-6 relative" id="om2_outputWorkspace">
+        
+        <div id="om2_emptyState" class="h-full flex flex-col items-center justify-center text-slate-400">
+            <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+            <p class="text-sm tracking-wide">等待执行任务。此处将展示诊断结果与生图工作流。</p>
+        </div>
+
+        <div id="om2_resultsContainer" class="hidden flex flex-col gap-6">
+            <!-- Section 1: Analysis Results -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h3 class="text-base font-bold border-b border-slate-100 pb-3 mb-4 flex items-center gap-2 text-slate-800">
+                    <span class="w-1.5 h-5 bg-red-500 rounded-sm"></span>图文冲突与拼写诊断
+                </h3>
+                <div class="grid grid-cols-2 gap-6">
+                    <div class="border border-slate-200 rounded p-3 bg-slate-50">
+                        <h4 class="text-xs font-semibold text-slate-500 mb-2 uppercase">上传的参考图档</h4>
+                        <div id="om2_analysisImages" class="grid grid-cols-2 gap-2"></div>
+                    </div>
+                    <div class="border border-slate-200 rounded p-3 bg-white flex flex-col text-sm">
+                        <h4 class="text-xs font-semibold text-slate-500 mb-2 uppercase">诊断结果 (错误与修改建议)</h4>
+                        <div id="om2_analysisText" class="flex-1 overflow-y-auto om2-custom-scrollbar text-slate-700 bg-red-50/50 p-2 rounded text-xs leading-relaxed"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Workflows -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <h3 class="text-base font-bold border-b border-slate-100 pb-3 mb-4 flex items-center gap-2 text-slate-800">
+                    <span class="w-1.5 h-5 bg-blue-500 rounded-sm"></span>场景生图执行站
+                </h3>
+                <div id="om2_promptsContainer" class="flex flex-col gap-6"></div>
+            </div>
+        </div>
+    </div>
+</div>
+            </div>
+        </div>
+    </main>
+
+    <script id="main-app-logic">
+        const apiKey = "";
+        let excelCsvData = "";
+        let oldExcelData = "";
+
+        // // MODIFY_START: 满血重铸 V5.36 完整架构级别的 RULES 与 CONFIG 指令矩阵，解除压缩
+        const RULES = {
+            GLOBAL: "身份：资深跨境电商运营（核心市场欧洲）。本土化规范：外文数字与单位间必须留一个半角空格（如 81 mm），小数点强制使用逗号（如 19,99 €）。要求极简与零废话原则：接到指令后，直接、冷峻地输出最终结果，绝对禁止输出寒暄、问候、过程解释或“好的”、“没问题”、“这就为您生成”等废话。能用 Markdown 表格展示的数据绝对不用文本堆砌；重度使用加粗小标题、列表和代码块来组织信息流。绝不自行脑补数据，缺失关键变量必须在表格中指出。",
+            A10: "A10 算法与 FABE 结构：标题前50字符权重最大化。五点严格采用三段式：[核心卖点总结(Features)] + [卖点说明(Advantages)] + [解决痛点/证据(Benefits/Evidence)]。第一至四点写属性利益，第五点必含配件。核心关键词必须用 <b> 标签加粗。结尾无句号。商品描述：必须使用 <p></p> 标签完整包裹每个段落，强制使用 <b></b> 加粗小标题和核心词（严禁使用 Markdown ** 语法）。输出商品描述时必须用 Markdown 的代码反引号 \` 将原生 HTML 源码包裹起来逃逸！",
+            VISUAL: "图片约束：比例1:1，8K画质。强约束：强制检查产品物理比例与环境背景的真实比例（如 5cm 的压蒜器放在黑板前绝不能比黑板大）。绝不要出现儿童。非必要绝对不要出现文字（除尺寸图的数字外，其余全部留白以便后期人工添加）。"
+        };
+
+        const CONFIG = {
+            MOD1: {
+                SYSTEM: "你是“亚马逊全维度上架数据解析专家 & 跨界爆款发掘顾问”。\n" + RULES.GLOBAL,
+                // // MODIFY_START: 新品解析植入主图与文案数量冲突熔断机制
+                PROMPT: (lang, country, vars, brand) => `
+目标语言: ${lang}
+目标国家: ${country}
+强制锁定品牌: ${brand ? brand : '未指定(需从图中或简述中提取)'}
+产品简述: ${vars}
+
+# Core Rules (高压线)
+1. 物理参数脱水：尺寸、重量、颜色、材质等必须绝对忠于图片和简述。有“品牌”必须填入（若指定了锁定品牌【${brand || '无'}】，则全域必须绝对使用该品牌，严禁偏离）。
+2. 【数量冲突熔断机制】：主图（如主图_01）通常显示准确的包装/配件数量。若标题/简述无数量，强制从主图提取；若标题/简述有数量，优先以此为准；🚨 若标题/简述的数量与主图显示的物理数量发生冲突，必须在【表2：待补充关键字段】中以红色加粗字体强烈发出警报，并直接询问用户确认真实数量！
+3. 简述非标题原则：用户的【产品简述】仅作锚点，必须拆解为底层参数，严禁直接作为商品名称或标题输出。
+4. 视觉元素穷举原则：套装或包含多种款式，必须仔细观察图片，逐一列出图案、动作或元素名称（绝不能只写总数）。
+5. 三维场景裂变机制：为了最大化扩展流量池，强制拆分为三个独立维度进行深度脑暴：①常规核心场景（基于基本属性）；②跨界扩展场景（替代用途/跨类目）；③人群与送礼节点。
+6. 合规避险原则（防误杀）：严禁在场景、搜索词中使用“儿童、婴儿、玩具”等高危词汇，请强制替换为“学生”、“全家适用”或“家居装饰”。
+7. 零废话输出：直接输出以下格式的 Markdown 表格，表格名不要改。
+
+**【表 1：可直接复制的上架核心数据与约束】**
+| 亚马逊简体中文后台字段 | 提取值 (${lang}) | 提取值 (中文) |
+| :--- | :--- | :--- |
+| [基础参数字段，如商品尺寸、材质、颜色等] | | |
+| 款式/元素/数量明细 (Design & Quantity) | [逐一列出所有具体图案、款式、动作名称及准确数量] | |
+| ① 常规核心场景 (Hauptanwendungsbereiche) | | |
+| ② 跨界扩展场景 (Erweiterte Nutzungsszenarien) | | |
+| ③ 赠礼与特定人群 (Zielgruppen) | [严禁儿童词汇] | |
+| 特殊功能/痛点对冲 | | |
+| Search Terms (搜索关键词) | [多维度长尾词、场景词，严格规避儿童词汇] | |
+| ⚠️ 【文案生成强制约束】 | Bitte halten Sie sich strikt an die physischen Parameter und vermeiden Sie Begriffe like "Kinder". | |
+
+**【表 2：待补充关键字段（选填）】**
+| 缺失/冲突字段 | 强烈警报与补充说明 | 
+| :--- | :--- |
+| [如：材质 / 数量冲突] | [若发生数量冲突，在此处用 <b><span style="color:red">警报：主图数量与文案不符...</span></b> 提示] |`
+                // // MODIFY_END
+            },
+            MOD2: {
+<!-- ... existing MOD2 to MOD6 code ... -->
+            },
+            OLD_MOD1: {
+                SYSTEM: "资深亚马逊老品优化专家。擅长“微创手术级” Listing 诊断与关键词权重拉升。严格执行指令，你必须无遗漏地输出所有要求的表格！\n" + RULES.GLOBAL,
+                // // MODIFY_START: 老品优化植入主图与文案数量冲突深度审查机制
+                PROMPT: (oldCopy, excel, pkg, lang, country, brand) => `
+【全局核心约束】：
+目标语言：${lang}
+目标国家：${country}
+强制锁定的品牌名称：${brand ? brand : '未指定(请严格从源码中提取，严禁脑补)'}
+
+【架构提醒】：亚马逊老品文案更新需保持一定的继承性，模型将根据当前文案执行“微创手术级”优化，严防大幅改动导致的权重掉落。
+
+【当前主图特征解析】:\n${pkg}
+【当前详情页源码数据 (含标题/五点/ASIN/规格等，待审计)】:\n${oldCopy}
+【评论表与关键词库数据】:\n${excel ? excel.substring(0, 100000) : "未提供"}
+
+请按以下严格结构顺序输出老品全维诊断优化报告，绝对不能遗漏任何一个表格！
+
+### 一、当前文案致命问题诊断 (Audit)
+针对“后台修改不能与原标题差距过大”的红线，指出当前用户标题、五点存在的具体违规、排版或逻辑缺失。
+
+### 二、核心关键词表格矩阵
+处理逻辑：基于上传的关键词文件，提取翻译、搜索量等指标；精简去重（合并单复数、剔除泛词，【防误杀】严格剔除“儿童/婴儿/玩具”等高危词汇）；链式融合。
+对比月搜索量、点击率、购买量、点击购买率(=月购买量/点击量)、供需比、PPC 竞价等核心数据，综合选择，按重要程度分类。
+⚠️ 强制规范：将文字的颜色改为：亮黄、橙色、绿色。黄色(<span style="color:#eab308;font-weight:bold;">词</span>)用于标题，橙色(<span style="color:#f97316;font-weight:bold;">词</span>)用于五点，绿色(<span style="color:#22c55e;font-weight:bold;">词</span>)用于整个Listing的补充。
+| 关键词 | 翻译 | 选择依据 (具体数据，注意：必须参考并列出 点击购买率=月购买量/点击量) |
+| :--- | :--- | :--- |
+
+### 三、情感极性与痛点防御
+分析输出：基于上传的Reviews文件，提炼买家最满意的 Top 3 核心卖点与最无法忍受的 Top 3 核心痛点。
+地道方案词生成：针对上述痛点，直接给出地道的目标语言解决方案词汇（以备后续撰写五点时用于防御差评）。
+
+### 四、产品底层特征与全维数据纠错表 (Based on Images & Source Data)
+结合主图特征与上方源码提取的核心数据，输出产品底层特征表。如果图中或源码文案中有明显错误，一并在表中提示。要求必须在亚马逊后台对应字段精准填入。
+
+🚨【核心提取数据强分析与纠错要求 (强制执行)】：
+1. 用户的品牌名称 (Marke)：必须锚定使用【${brand ? brand : '从源码提取的品牌'}】，后续重写文案绝对严禁偏离该品牌！
+2. 【数量冲突熔断机制】：深度比对老品原标题/文案中的产品数量与主图展示的物理数量。若原标题无数量，以主图提取为准；🚨若原标题数量与主图物理数量发生冲突，必须在表格中以 <b><span style="color:red">【数量冲突致命警报】</span></b> 开头，明确指出文案数量与图片数量的差异，并强制要求用户确认！
+3. 产品标题、五点描述：执行强分析，指出埋词、逻辑或卖点痛点缺陷。
+4. 产品长描述、包装清单/包含组件：执行强分析与纠错，指出遗漏或冗余。
+5. 完整类目节点路径：严格判定分析是否与产品精准匹配。
+6. 库存状态 (Verfügbarkeit)：若分析发现库存不足，必须在此表中强烈提醒用户。
+7. 对 大小类 BSR 排名、购物车价格、划线价、折扣比例、促销优惠券信息 进行全面诊断评估。
+8. ⚠️【图文纠错及美化专属极致指令】：你必须像用放大镜一样审查每一张原图！如果发现任何不妥，必须将纠错内容统一放在表格的“强分析与纠错提示”列中，并严格采用以下固定分行格式输出（绝不许自创多余的列或排版错乱）：
+👉 图文纠错（图 X）：原图文案存在【XXX】错误，修改原因：【XXX】，正确的文案：【给出修改后的正确拼写或文案内容，方便用户一键复制更改】。
+👉 图片修改（图 X）：图片存在【XXX】瑕疵/问题，美工需要修改为：【给出具体的美化指令】。
+（如果没有问题，也必须明确回复：“图文纠错（图 X）：审查无误，无需美化及修改文案”）
+
+| 亚马逊后台字段/提取维度 (含ASIN/尺寸/类目/库存/图文纠错等) | 提取值 (本土化) | 中文 | 强分析与详细纠错提示 (⚠️若为图片审查，必须严格使用【图文纠错】格式；若为数量冲突，必须高亮红字警报) |
+| :--- | :--- | :--- | :--- |
+| [物理参数及各维度数据] | | | [若有误或需提醒在此指出，无则写无] |
+
+### 五、大模型静默风控审查及 A10 标准重写矩阵
+// // MODIFY_END
+
+🚨🚨🚨【最高级别生死红线：防侵权与防认证绝对拦截器】🚨🚨🚨
+（大模型强制执行指令：无论任何情况，哪怕参考文本或竞品数据中包含以下词汇，你在重写标题、五点、描述和ST时，都必须绝对、彻底地将其屏蔽和过滤！一旦输出中包含“食品级 (Lebensmittelecht)”、“抗菌”、“认证”等词汇，将导致账号封禁！）
+强制执行步骤：生成完毕后，必须在内部再做一次全文检索（自我审核），确保绝对没有出现 Lebensmittel、CE-Zertifiziert、Antibakteriell、BPA-frei 等任何属于红线的绝对禁用词！全部使用灰度转化词平替！
+🚨🚨🚨
+
+【防侵权与防认证词汇红线（强制执行）】：
+文案输出的标题、五点、商品描述内容，不能引发认证，避免文案违规，品类属性及替换规则如下：
+- 涉水/食品/母婴 (Lebensmittel & Baby): 绝对禁用词(Rote Liste - 触发审查/侵权): Lebensmittelecht (食品级), Giftfrei (绝对无毒), Babysicher (婴儿安全), BPA-frei (无双酚A)未测勿写。灰度转化词(Grauzone - 免责且高转化): Geruchsneutral (无异味), Hygienisch im Alltag (日常卫生), Leicht zu reinigen (易于清洁), Hochwertiges Material (优质材质)。
+- 带电/3C/家电 (Elektronik & 3C): 绝对禁用词: CE-Zertifiziert (CE认证)无证勿写, Explosionsgeschützt (绝对防爆), Brandsicher (防火)。灰度转化词: Zuverlässige Leistung (性能可靠), Hitzebeständiges Gehäuse (耐热外壳), Stabiler Betrieb (稳定运行)。
+- 贴身/纺织/个护 (Hautkontakt): 绝对禁用词: Hypoallergen (防过敏), Antibakteriell (杀菌/抗菌), Medizinisch (医疗级/治疗)。灰度转化词: Hautfreundlich (亲肤), Atmungsaktiv (舒适透气), Sanft zur Haut (温和触感), Ergonomisch (人体工学)。
+- 环保/包装/材质 (Umwelt & Material): 绝对禁用词: 100 % Umweltfreundlich (100%环保), Biologisch abbaubar (可完全生物降解)。灰度转化词: Langlebig (坚固耐用/降低替换率), Wiederverwendbar (可重复使用), Ressourcenschonend (节约资源)。
+
+⚠️ 极度重要：左侧只允许输出最终文案，右侧输出中文翻译。绝对禁止在单元格文本开头附加任何中文前缀！商品描述的原生 HTML 代码必须用 Markdown 代码块反引号包裹！
+
+| 目标语言原文 | 中文对照翻译 |
+| :--- | :--- |
+| [直接输出标题。公式：品牌名+大词+属性/数量-次词&场景+兼容性。限200字符，首85字符核心前置。加粗关键词。严禁全大写/儿童暗示。] | [带字符数统计] |
+| [直接输出五点1。严禁修改参数。遵循 FABE 三段式。核心关键词用 <b> 加粗。限500字符，无句号] | |
+| [直接输出五点2] | |
+| [直接输出五点3] | |
+| [直接输出五点4] | |
+| [直接输出五点5。必含配件说明] | |
+| [Search Terms。纯单词，无标点，去重，限249字节] | |
+| \`[输出包含 <p> 和 <b> 标签的原生 HTML 商品描述。结构为：特点、规格、清单、Hinweis(备注)、Warnung(警告)]\` | [中文对照纯文本换行输出，不要带任何 HTML 标签] |
+
+**亚马逊后台上传辅助表**
+| 亚马逊后台标准字段名 (简体中文) | 对应目标国字段名 | 建议填入项 | 中文翻译 |
+| :--- | :--- | :--- | :--- |
+| 推荐节点 / 搜索词 / 材质 / 尺寸等... | | | |
+
+[GEM2_START]
+【GEM 2 视觉与广告初始化包】
+| 维度 | 提取内容与执行指令 |
+| :--- | :--- |
+| 品牌与语言信息 | |
+| 核心参数 (数量、规格、材质、尺寸、颜色等，需特别提醒数量问题) | |
+| 核心卖点 Top 3 与核心痛点 Top 3 | |
+| 德语标题定稿 | |
+| 核心流量大词 Top 5 | |
+[GEM2_END]`
+            },
+            MOD3: {
+                SYSTEM: "你是一名拥有8年实战经验的高级视觉总监。绝对禁止输出分析过程，只输出一个横向 Markdown 表格。\n" + RULES.VISUAL,
+                PROMPT: (pkg) => `
+仔细审阅我发给你的【GEM 2 视觉与广告初始化包】以及竞品图片，向没有实物、只能靠素材合成的美工下达清晰、极具执行力的高转化图需。
+
+【1-7 张图片内容规划】
+图 1：白底主图，纯白底，占比 85% 以上，绝对无文案。
+图 2：尺寸与基础参数图。标注引线位置。
+图 3：材质/卖点图 1（锐化或局部放大对照）。
+图 4：功能/卖点图 2。展示核心部件。
+图 5：痛点反击/卖点图 3（对比合成打叉打勾）。
+图 6：单场景图（调用常规场景）。
+图 7：四宫格场景图（调用跨界场景或送礼人群）。
+
+【输出格式要求 - 强制表格化】
+只输出一个表格，横向排列列标题：[白底图] | [尺寸图] | [图片 3（材质图）] | [图片 4（细节图 1）] | [图片 5（细节图 2）] | [图片 6（单场景图）] | [图片 7（四宫格场景图）]
+
+第一行：[目标语言文案内容，标题加粗。如无文案填“无”。多内容强制用 / 隔开]。
+第二行：[中文翻译内容。如无文案填“无”]。
+第三行：[美工综合执行指令：必须明确参考具体的竞品图！句式必须严格按此格式：“如参考图1，选取[某元素/排版]，将文案放在[某位置]”。不需要且严禁出现任何品牌名！将主体处理、背景氛围、文字排版要求合并在一行内连贯输出。绝对禁止拆分多行！]。
+
+【包裹内容】:
+${pkg}`
+            },
+            MOD4: {
+                SYSTEM: "生图裂变中枢。⚠️执行深度大数据分析：必须深入解析初始化包裹及竞品图和产品图的图中材质、尺寸变量。将真实变量注入模板中，确保匹配产品！图片约束：比例1:1，8K画质。强约束：强制检查产品物理比例与环境背景的真实比例（如 5cm 的压蒜器放在黑板前绝不能比黑板大）。绝不要出现儿童。绝对不要出现文字（除尺寸图的数字外，其余全部留白以便后期人工添加）。",
+                PROMPT: (pkg) => `
+【底线要求】：
+1，必须参考竞品图和产品图，选取图中的真实产品生成，产品严禁自创/AI脑补。
+2，只能使用竞品图和产品图中的产品颜色规格尺寸。不得更改。
+3，与背景（人物。场景）融合时，不得脱离比例。
+
+基于以下包裹物理特征，融合进 1-7 图中文生图模板中：
+${pkg}
+
+【中文生图 Prompt 必须以此框架为基础，并融合本产品的专属特征*需要将合适的多张图发送给大模型，解析后根据竞品图或者产品图生成*】：
+- 图1(主图)：生成一张专业的亚马逊主图。必须基于参考图中展示的产品外观、*参考图X*尺寸及颜色特征，请创建一张照片级写实渲染图，确保在色彩、比例及细节上实现精准还原。产品主体必须居中放置，占据画面至少 85% 的区域，并置于纯白色背景（RGB 255, 255, 255）之上。图像应呈现出专业影棚级的布光效果，其特征包括柔和自然的阴影、明亮的光照，以及全画面范围内的锐利对焦。构图中严禁包含任何额外的道具、文字、Logo 或其他无关元素。最终成品应传达出一种整洁、极简的美学风格——这正是专业电商视觉呈现的典型特征——同时具备卓越的细节还原度及 4K 分辨率。
+- 图2(尺寸图)：必须基于参考图像中展示的产品，生成一张符合亚马逊（Amazon）规范的尺寸图。图中产品居中放置，并——依据“模块1”中提供的尺寸数据，结合竞品详情页中可见或可逻辑推导出的尺寸信息——自动、清晰地标注了高度、宽度、深度、重量及容量等关键参数；同时，该图像还整合了此类产品类别的典型规格数据。图像背景采用极简风格，线条锐利分明，搭配易于辨识的无衬线字体；其呈现出极高精度的照片级渲染效果，整体视觉风格已针对电子商务应用场景进行了专门优化。
+- 图3(材质卖点)：*必须基于提供的参考图像，生成一张详尽且具有亚马逊风格的信息图，专门突出展示该产品的材质与工艺细节。产品主体应居中放置，并以照片级的逼真度进行渲染。系统将自动分析并视觉强化关键的制造特征——提取诸诸如可见纹理、表面饰面、结构细节、接缝处理及材质特性等视觉元素。系统将优先提取在分析过程中已被明确识别的材质与结构属性；若某项属性尚不确定，则不予收录。该信息图将辅以特写镜头。整体设计采用简洁的布局、精致的辅助图标以及纯净的白色背景；结合锐利清晰的细节渲染，共同营造出一种专业且极具质感的视觉美学，​​堪称电商产品展示的理想之选。*
+- 图4(四视图)：必须基于参考图像中的产品[注入产品简述]，请分别生成正面图、侧面图、背面图和俯视图。要求采用白色背景及专业级布光；图像必须严格按照附图中所示的比例进行呈现。严禁对产品设计进行任何修改。不要文字。
+- 图5(痛点反击)：必须基于参考图像中的产品，生成一张亚马逊产品信息图。针对核心痛点[注入痛点对冲特征]，运用极简风格的箭头标注材质特性，并预留适度的自然留白以便添加文字。现代极简主义美感，淡雅渐变背景。柔和影棚级布光消除阴影，8K分辨率。
+- 图6(单场景图)：必须基于提供的参考图，生成一张亚马逊风格的生活场景图，展现[注入核心场景]。图中产品必须清晰可见并居中放置；整体需采用自然光照，保持逼真的比例与阴影效果；风格写实且细节丰富；画面中不得包含任何文字叠加。
+- 图7(四宫格场景图)：*必须基于参考图像中展示的产品，生成一组亚马逊风格的信息图表网格。该网格旨在生动呈现该产品的各类实际应用场景。根据包裹中分析的场景，自动识别并筛选出 4 个恰当且贴近生活方式的典型用例，并同步提取其对应的核心优势。这些逼真的微缩场景将以网格或拼贴的形式进行排布。图像视觉效果将采用自然光照处理，确保产品在每一个场景中均清晰可见；整体美学风格保持高度统一，细节刻画一丝不苟，完全符合亚马逊产品详情页面的展示规范要求。*
+直接输出带有 |:---| 分割线的 Markdown 表格，不要解释：
+### 八、AI 垫图裂变指令矩阵 (包含 7 张图的 Prompt)
+| 适用图位 (1-7图) | 植入的竞品/产品原图 | 中文生图 Prompt | 垫图差异化与比例检查建议 |
+| :--- | :--- | :--- | :--- |`
+            },
+            MOD5: {
+                SYSTEM: "高级运营。执行风控红线，采用行业通病+工艺升级逻辑。",
+                PROMPT: (pkg, focus) => `
+【特征包裹】: ${pkg}
+【定制 QA 对冲偏好】: ${focus}
+直接输出5条被打消疑虑的新品拟人化自问自答 QA，格式保持如下表名：
+### 十一、新品冷启动 5 条拟人化自问自答 QA 表
+| 编号 | 买家提问 | 卖家专业拟人回答 | 中文解析与种草锚点 |
+|:---|:---|:---|:---|`
+            },
+            MOD6: {
+                SYSTEM: "顶级 AI 视频导演。专注于适配 Google Veo 等 8 秒视频大模型的极简运镜脚本设计。",
+                PROMPT: (pkg) => `
+根据前置包裹，生成一段用于【AI 视频大模型（8秒生成）】的单段式英文视频生成 Prompt。
+要求：
+1. 只需要输出一段极其详细的纯英文 Prompt，不要排版成表格。
+2. 必须包含：极致运镜 (Camera movement)、光影材质 (Lighting and texture)、物理动作演示 (Action)。
+3. 明确用中文说明建议投喂哪几张参考图。
+
+【包裹内容】:\n${pkg}
+
+格式：
+### 🎬 8 秒 AI 视频生成运镜指令
+**【参考图投喂建议】**：[中文说明]
+**【Video Prompt (English)】**：
+[纯英文 Prompt]`
+            },
+            OLD_MOD1: {
+                SYSTEM: "资深亚马逊老品优化专家。擅长“微创手术级” Listing 诊断与关键词权重拉升。严格执行指令，你必须无遗漏地输出所有要求的表格！\n" + RULES.GLOBAL,
+                PROMPT: (oldCopy, excel, pkg, lang, country, brand) => `
+【全局核心约束】：
+目标语言：${lang}
+目标国家：${country}
+强制锁定的品牌名称：${brand ? brand : '未指定(请严格从源码中提取，严禁脑补)'}
+
+【架构提醒】：亚马逊老品文案更新需保持一定的继承性，模型将根据当前文案执行“微创手术级”优化，严防大幅改动导致的权重掉落。
+
+【当前主图特征解析】:\n${pkg}
+【当前详情页源码数据 (含标题/五点/ASIN/规格等，待审计)】:\n${oldCopy}
+【评论表与关键词库数据】:\n${excel ? excel.substring(0, 100000) : "未提供"}
+
+请按以下严格结构顺序输出老品全维诊断优化报告，绝对不能遗漏任何一个表格！
+
+### 一、当前文案致命问题诊断 (Audit)
+针对“后台修改不能与原标题差距过大”的红线，指出当前用户标题、五点存在的具体违规、排版或逻辑缺失。
+
+### 二、核心关键词表格矩阵
+处理逻辑：基于上传的关键词文件，提取翻译、搜索量等指标；精简去重（合并单复数、剔除泛词，【防误杀】严格剔除“儿童/婴儿/玩具”等高危词汇）；链式融合。
+对比月搜索量、点击率、购买量、点击购买率(=月购买量/点击量)、供需比、PPC 竞价等核心数据，综合选择，按重要程度分类。
+⚠️ 强制规范：将文字的颜色改为：亮黄、橙色、绿色。黄色(<span style="color:#eab308;font-weight:bold;">词</span>)用于标题，橙色(<span style="color:#f97316;font-weight:bold;">词</span>)用于五点，绿色(<span style="color:#22c55e;font-weight:bold;">词</span>)用于整个Listing的补充。
+| 关键词 | 翻译 | 选择依据 (具体数据，注意：必须参考并列出 点击购买率=月购买量/点击量) |
+| :--- | :--- | :--- |
+
+### 三、情感极性与痛点防御
+分析输出：基于上传的Reviews文件，提炼买家最满意的 Top 3 核心卖点与最无法忍受的 Top 3 核心痛点。
+地道方案词生成：针对上述痛点，直接给出地道的目标语言解决方案词汇（以备后续撰写五点时用于防御差评）。
+
+### 四、产品底层特征与全维数据纠错表 (Based on Images & Source Data)
+结合主图特征与上方源码提取的核心数据，输出产品底层特征表。如果图中或源码文案中有明显错误，一并在表中提示。要求必须在亚马逊后台对应字段精准填入。
+
+🚨【核心提取数据强分析与纠错要求 (强制执行)】：
+1. 用户的品牌名称 (Marke)：必须锚定使用【${brand ? brand : '从源码提取的品牌'}】，后续重写文案绝对严禁偏离该品牌！
+2. 产品标题、五点描述：执行强分析，指出埋词、逻辑或卖点痛点缺陷。
+3. 产品长描述、包装清单/包含组件：执行强分析与纠错，指出遗漏或冗余。
+4. 完整类目节点路径：严格判定分析是否与产品精准匹配。
+5. 库存状态 (Verfügbarkeit)：若分析发现库存不足，必须在此表中强烈提醒用户。
+6. 对 大小类 BSR 排名、购物车价格、划线价、折扣比例、促销优惠券信息 进行全面诊断评估。
+7. ⚠️【图文纠错及美化专属极致指令】：你必须像用放大镜一样审查每一张原图！如果发现任何不妥，必须将纠错内容统一放在表格的“强分析与纠错提示”列中，并严格采用以下固定分行格式输出（绝不许自创多余的列或排版错乱）：
+👉 图文纠错（图 X）：原图文案存在【XXX】错误，修改原因：【XXX】，正确的文案：【给出修改后的正确拼写或文案内容，方便用户一键复制更改】。
+👉 图片修改（图 X）：图片存在【XXX】瑕疵/问题，美工需要修改为：【给出具体的美化指令】。
+（如果没有问题，也必须明确回复：“图文纠错（图 X）：审查无误，无需美化及修改文案”）
+
+| 亚马逊后台字段/提取维度 (含ASIN/尺寸/类目/库存/图文纠错等) | 提取值 (本土化) | 中文 | 强分析与详细纠错提示 (⚠️若为图片审查，必须严格使用【图文纠错（图 X）】及【图片修改（图 X）】的连贯格式) |
+| :--- | :--- | :--- | :--- |
+| [物理参数及各维度数据] | | | [若有误或需提醒在此指出，无则写无] |
+
+### 五、大模型静默风控审查及 A10 标准重写矩阵
+
+🚨🚨🚨【最高级别生死红线：防侵权与防认证绝对拦截器】🚨🚨🚨
+（大模型强制执行指令：无论任何情况，哪怕参考文本或竞品数据中包含以下词汇，你在重写标题、五点、描述和ST时，都必须绝对、彻底地将其屏蔽和过滤！一旦输出中包含“食品级 (Lebensmittelecht)”、“抗菌”、“认证”等词汇，将导致账号封禁！）
+强制执行步骤：生成完毕后，必须在内部再做一次全文检索（自我审核），确保绝对没有出现 Lebensmittel、CE-Zertifiziert、Antibakteriell、BPA-frei 等任何属于红线的绝对禁用词！全部使用灰度转化词平替！
+🚨🚨🚨
+
+⚠️ 经过大模型静默风控审查后，输出标题、五点、商品描述、后台ST。要求与新品LISTING的A10文案规格、表格规范完全一致！
+
+【撰写规范（强制执行）】：
+1. **标题**：
+- 逻辑结构：符合亚马逊权重算法：[品牌名] + [核心大词]（流量更大的大类目词或者竞品高频词，因为第一个逗号前的权重最大） + [属性词或数量词] - [次核心词] & [场景词] + [兼容性说明]。
+- 字符数最高上限 200 个字符（含空格，在不影响体验的情况下尽可能凑满200），核心关键信息必须前置于首 85 个字符（适配手机端显示，电脑端为 135 个字符）。
+- 强制首字母大写（连词、冠词、少于 5 个字母的介词除外），严禁全大写及包含促销用语。
+- 符号与空格：使用「-」、「&」等符号时，两边必须添加空格。全部使用英文标点；名词首字母大写；数字与单位间留空格（如 81 mm）；小数点用逗号（如 11,5 mm）。
+- 合规锁死：严禁出现促销词；【合规避险防误杀】严禁在场景、功能或搜索词中直接使用“儿童、婴儿、玩具”（如 kid, baby, toy 等）高危词汇。如果产品可爱或适合教学，强制将其替换为“学生 (student)”、“全家适用 (family)”，或强调其为“家居装饰 (decoration)”、“教学辅助”；提及其他品牌必须加介词 für。
+
+2. **五点描述 (Bullet Points)**：
+- 核心要求：将确定的标题核心大词进行二次自然埋词（以强化相关性）还有根据产品图得到的场景拓展，并重点融合前面分析出的长尾属性词、痛点解决方案词及收录词以及确认需要埋入五点的词。符合亚马逊最新 A10算法及目标国家母语化规范，结尾不要使用句号。
+- 参数绝对锁定（强制执行）：在撰写文案时，必须严格遵守前面提供的产品参数。严禁修改任何规格尺寸、材质及颜色。数据必须与我提供的信息百分之百匹配。
+- FABE 三段式结构：Features 产品特征、Advantages 优势、Benefits 顾客利益、Evidence 证据。五个要点每条不超过500字符。
+- 结构规范：每条严格遵循：[第一段：核心卖点总结（Features 产品特征）] + [第二段：卖点说明（Advantages 优势）] + [第三段：帮买家解决的问题（直击第一段提到的痛点）（Benefits 顾客利益、Evidence 证据）]
+- 卖点分配：请结合“卖点布局建议”，确保 5 条卖点逻辑由强到弱排列。第一至第四点写属性与利益，第 5 个要点必须包含保修信息或随附配件。
+- 视觉重点：将五点中使用的核心关键词加粗显示（<b>标签</b>）。严禁堆砌，确保语境自然、地道。
+
+3. **商品描述 (HTML封装)**：
+- 数据纠偏：严禁输出竞品拥有而我司产品不具备的规格、材质或特点。
+- HTML封装与视觉识别：必须使用 <p></p> 分段，使用 ** ** 加粗小标题。文案中的核心关键词必须加粗显示。
+- 亚马逊规范自检（三位一体）：字符数符合类目限制；严禁促销信息与关键词堆砌；最后声明图片手动拍摄可能存在误差。
+- 合规锁死：严禁违禁词、承诺性用语；【合规避险防误杀】严禁在场景、功能或搜索词中直接使用“儿童、婴儿、玩具”等高危词汇，强制将其替换为“学生”、“全家适用”或强调为“家居装饰”。参数标准化：数字单位间留空格；小数点用逗号。
+- 输出结构必须包含：
+  Feature（特点）：<p>EIGENSCHAFTEN:</p>
+  Specification（规格）：<p>PRODUKTDETAILS & ABMESSUNGEN:</p>
+  Package Included（包装清单）：<p>LIEFERUMFANG:</p>
+  <p>备注：由于手动测量，可能存在轻微误差；不同显示器可能存在颜色差异。（目标语言）</p>
+  <p>警告：关于可能错误使用产品导致的危险提示。（目标语言）</p>
+
+4. **后台 ST (Search Terms)**：
+- 精准索引：仅提取第一段及第二段中标题未覆盖的剩余高价值词、同义词、场景词、容易拼写错误的词。
+- 拼写容错：新增多个核心词的德语常见拼写错误（Misspellings）并去重放入。
+- 严禁内容：严禁包含包装清单（如 1 pc）、描述性句子、标点符号、重复词或任何品牌名。
+- 格式规范：纯单词形式，空格分隔，去重，总长度严格控制在 249 字节以内。
+- 德语规范（强制）：严禁出现 "Garantie"；【合规避险防误杀】严禁使用“儿童、婴儿、玩具”等词汇，统一强制替换为 (学生) / (全家适用)；符号前后留空格；数字单位间留空格；小数点用逗号。
+
+5. **【防侵权与防认证词汇红线（强制执行）】**：
+文案输出的标题、五点、商品描述内容，不能引发认证，避免文案违规，品类属性及替换规则如下：
+- 涉水/食品/母婴 (Lebensmittel & Baby): 绝对禁用词(Rote Liste - 触发审查/侵权): Lebensmittelecht (食品级), Giftfrei (绝对无毒), Babysicher (婴儿安全), BPA-frei (无双酚A)未测勿写。灰度转化词(Grauzone - 免责且高转化): Geruchsneutral (无异味), Hygienisch im Alltag (日常卫生), Leicht zu reinigen (易于清洁), Hochwertiges Material (优质材质)。
+- 带电/3C/家电 (Elektronik & 3C): 绝对禁用词: CE-Zertifiziert (CE认证)无证勿写, Explosionsgeschützt (绝对防爆), Brandsicher (防火)。灰度转化词: Zuverlässige Leistung (性能可靠), Hitzebeständiges Gehäuse (耐热外壳), Stabiler Betrieb (稳定运行)。
+- 贴身/纺织/个护 (Hautkontakt): 绝对禁用词: Hypoallergen (防过敏), Antibakteriell (杀菌/抗菌), Medizinisch (医疗级/治疗)。灰度转化词: Hautfreundlich (亲肤), Atmungsaktiv (舒适透气), Sanft zur Haut (温和触感), Ergonomisch (人体工学)。
+- 环保/包装/材质 (Umwelt & Material): 绝对禁用词: 100 % Umweltfreundlich (100%环保), Biologisch abbaubar (可完全生物降解)。灰度转化词: Langlebig (坚固耐用/降低替换率), Wiederverwendbar (可重复使用), Ressourcenschonend (节约资源)。
+
+⚠️ 输出要求：左侧输出目标语言最终文案，右侧输出中文翻译。原生 HTML 代码必须用 Markdown 代码块反引号 \` 包裹！
+
+| 优化项 | 目标语言原文 | 中文对照翻译 |
+| :--- | :--- | :--- |
+| 优化标题 | [严格按公式生成的新标题。最高上限 200 字符] | [带字符数统计] |
+| 优化五点 1 | [直接输出五点1。FABE 三段式。核心词用 <b> 加粗。无句号] | |
+| 优化五点 2 | [直接输出五点2] | |
+| 优化五点 3 | [直接输出五点3] | |
+| 优化五点 4 | [直接输出五点4] | |
+| 优化五点 5 | [直接输出五点5。必含配件说明] | |
+| 优化后台 ST | [249 字节纯单词字符串，空格分隔] | |
+| 优化 HTML 描述 | \`[输出包含 <p> 和 <b> 标签的原生 HTML 商品描述。必须包含结构要求的各项与最后两条备注/警告提示]\` | [中文对照纯文本换行输出，不要带任何 HTML 标签] |
+
+### 六、手动广告精准出击建议
+建议哪些词可以打手动精准，建议竞价。
+| 关键词 | 建议竞价 | 手动匹配方式 (精准、手动词组、手动广泛) | 策略动机 |
+| :--- | :--- | :--- | :--- |
+`
+            },
+            OLD_MOD2: {
+                SYSTEM: "资深亚马逊视觉总监。专精老品图片 CTR 翻新与转化率重构。严格遵守欧洲本土化审美（如德式极简），严禁出现儿童玩具敏感元素。只输出带分割线的 Markdown 表格，零废话。",
+                PROMPT: (focus) => `请对上传的老品图片进行深度视觉诊断，并结合提供的【视觉升级偏好】或【对标参考图】下达翻新重绘指令。
+【视觉升级偏好】: ${focus ? focus : '无特殊偏好，按最高转化标准执行'}
+【输出要求 (强制执行)】:
+1. 必须精准指出老图的致命视觉缺陷（如：廉价感、质感差、比例失调、场景不符本土化）。
+2. 输出《老品 1-7 图重构执行清单》表格，明确每张图的具体重构动作。
+3. 表格必须包含 Markdown |:---| 分割线。
+
+### 一、老图致命视觉缺陷诊断 (Audit)
+| 图片序号/类型 | 当前视觉缺陷 (致命转化阻碍) | 重构核心方向 |
+| :--- | :--- | :--- |
+
+### 二、老品 1-7 图重构执行清单 (Action Blueprint)
+| 目标图位 | 视觉重构指令 (必须详细到光影、材质质感、参照物比例) | 美工排版与文案重构要求 |
+| :--- | :--- | :--- |
+`
+            }
+        };
+        // // MODIFY_END
+
+        /* ==================== 核心通信与重试逻辑 ==================== */
+        async function fetchWithRetry(modelName, payload, retries = 5) {
+            const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const res = await fetch(apiEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return await res.json();
+                } catch (err) {
+                    if (i === retries - 1) throw err;
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
+        }
+
+        async function fetchAI(parts, sys, isImageGen = false) {
+            const modelName = isImageGen ? "gemini-2.5-flash-image-preview" : "gemini-2.5-flash-preview-09-2025";
+            const payload = { contents: [{ parts }], systemInstruction: { parts: [{ text: sys }] } };
+            if (isImageGen) payload.generationConfig = { responseModalities: ["TEXT", "IMAGE"] };
+            return await fetchWithRetry(modelName, payload);
+        }
+
+        /* ==================== 补全的工具函数 ==================== */
+        function injectTableCopyButtons(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const tables = container.querySelectorAll('table');
+            tables.forEach(table => {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const labelCell = row.cells[0];
+                    const contentCell = row.cells[1] || row.cells[0];
+                    if (labelCell && contentCell && labelCell.innerText.match(/文案|标题|五点|描述|ST|Prompt/i)) {
+                        if (contentCell.querySelector('.copy-applied')) return;
+                        
+                        const originalContent = contentCell.innerHTML;
+                        contentCell.innerHTML = '';
+                        const wrap = document.createElement('div');
+                        wrap.className = 'mb-2 copy-applied';
+                        wrap.innerHTML = originalContent;
+                        contentCell.appendChild(wrap);
+
+                        const btn = document.createElement('button');
+                        btn.className = 'apple-btn apple-btn-secondary !py-1 !px-2.5 !text-[10px] flex items-center shadow-sm border border-[var(--border-color)] hover:text-[var(--color-blue)] transition-colors mt-2';
+                        btn.innerHTML = '<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg> 📋 复制内容';
+                        
+                        btn.onclick = () => {
+                            const ta = document.createElement("textarea");
+                            ta.value = wrap.innerText;
+                            ta.style.position = "fixed"; ta.style.left = "-9999px";
+                            document.body.appendChild(ta); ta.select();
+                            try {
+                                document.execCommand('copy');
+                                btn.innerHTML = '<span class="text-[var(--color-green)] flex items-center"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> 已复制</span>';
+                                btn.classList.add('border-[var(--color-green)]', 'bg-green-50/10');
+                                setTimeout(() => {
+                                    btn.innerHTML = '<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg> 📋 复制内容';
+                                    btn.classList.remove('border-[var(--color-green)]', 'bg-green-50/10');
+                                }, 2500);
+                            } catch(e) { console.error(e); }
+                            document.body.removeChild(ta);
+                        };
+                        contentCell.appendChild(btn);
+                    }
+                });
+            });
+        }
+
+        function setOutput(id, html) { 
+            const container = document.getElementById(id);
+            if(container) {
+                container.innerHTML = html; 
+                injectTableCopyButtons(id);
+            }
+        }
+
+        function setLoading(id, state, text) {
+            const b = document.getElementById(id);
+            if(!b) return;
+            if(state) {
+                b.disabled = true;
+                b.dataset.og = b.innerText;
+                b.innerHTML = '<div class="loader"></div>';
+                if (window.GeekMatrixEngine) window.GeekMatrixEngine.start();
+            } else {
+                b.disabled = false;
+                b.innerText = b.dataset.og || text || "执行";
+                if (window.GeekMatrixEngine) window.GeekMatrixEngine.stop();
+            }
+        }
+
+        function showToast(m) { 
+            const t = document.getElementById('toast'); 
+            document.getElementById('toast-text').innerText = m; 
+            t.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+            t.classList.add('opacity-100', 'translate-y-0');
+            setTimeout(() => {
+                t.classList.remove('opacity-100', 'translate-y-0');
+                t.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+            }, 3000); 
+        }
+
+        async function fileToBase64(file) { 
+            return new Promise((resolve, reject) => { 
+                const reader = new FileReader(); 
+                reader.onload = () => resolve(reader.result.split(',')[1]); 
+                reader.onerror = error => reject(error);
+                reader.readAsDataURL(file); 
+            }); 
+        }
+
+        function copyOutputText(id) { 
+            const el = document.getElementById(id); 
+            if(el) {
+                const text = el.innerText;
+                if (!text.trim() || text.includes('等待执行') || text.includes('等待注入')) return showToast('无有效内容');
+                const ta = document.createElement("textarea");
+                ta.value = text;
+                ta.style.position = "fixed";
+                ta.style.left = "-9999px";
+                document.body.appendChild(ta);
+                ta.select();
+                try {
+                    document.execCommand('copy');
+                    showToast("文本已复制");
+                } catch(e) {
+                    console.error("复制失败", e);
+                    showToast("复制失败，请手动复制");
+                } finally {
+                    document.body.removeChild(ta);
+                }
+            }
+        }
+
+        /* ==========================================================================
+           业务模块执行逻辑 (新品 LISTING)
+           ========================================================================== */
+        async function runModule1(isUpdate, isAutoCascade = false) {
+            const l = document.getElementById('m1-lang').value;
+            const c = document.getElementById('m1-country').value;
+            const b_brand = document.getElementById('m1-brand') ? document.getElementById('m1-brand').value.trim() : '';
+            let v = document.getElementById('m1-vars').value;
+            const s = document.getElementById('m1-supplement').value;
+            const fs = document.getElementById('m1-image').files;
+            
+            if (!v && fs.length === 0) return showToast("必须上传原图或输入基础简述！");
+            if (isUpdate && s) v += "\n\n【用户修正/补充】: " + s;
+            
+            setLoading(isUpdate ? 'btn-update-m1' : 'btn-run-m1', true);
+            setOutput('mod1-output', '<div class="text-center mt-24"><div class="loader"></div><p class="text-xs mt-3 opacity-50">多模态特征脱水中...</p></div>');
+            
+            let imageJsonContext = "";
+            if (fs.length > 0) {
+                setOutput('mod1-output', '<div class="text-center mt-24"><div class="loader"></div><p class="text-xs mt-3 opacity-50">第一阶段：执行图片高颗粒度 JSON 结构化解析锚定...</p></div>');
+                try {
+                    const jsonPrompt = "强制指令：将图片内容转化为极致颗粒度的 JSON 数据对象。字段必须严格包含：'materials'(材质反光/表面纹理), 'dimensions'(比例估算/绝对尺寸), 'colors'(色彩体系), 'texts'(图中文案识别/拼写错误检查), 'defects'(可见瑕疵/工艺断层), 'accessories'(配件明细), 'scenarios'(背景与环境参照物)。直接输出纯 JSON 字符串，绝对不要包含任何 Markdown 代码块标记或解释性文字。";
+                    const jsonParts = [{ text: jsonPrompt }];
+                    for(let f of fs) jsonParts.push({ inlineData: { mimeType: f.type, data: await fileToBase64(f) } });
+                    const jsonRes = await fetchAI(jsonParts, "你是一个严苛的机器视觉转 JSON 解析引擎。只输出合法的 JSON 字符串。");
+                    imageJsonContext = "\n\n【图片像素级 JSON 解析数据字典 (最高精度参考)】:\n" + jsonRes.candidates[0].content.parts[0].text;
+                    v += imageJsonContext; 
+                    showToast("✅ 新品图片 JSON 高颗粒度解析完成");
+                } catch(err) {
+                    console.error("新品 JSON 解析流产", err);
+                    showToast("⚠️ JSON 解析超时，安全冗余通道已接管");
+                }
+                setOutput('mod1-output', '<div class="text-center mt-24"><div class="loader"></div><p class="text-xs mt-3 opacity-50">多模态特征脱水与 A9 引擎指令融合中...</p></div>');
+            }
+
+            try {
+                const parts = [{ text: CONFIG.MOD1.PROMPT(l, c, v, b_brand) }];
+                for(let f of fs) parts.push({ inlineData: { mimeType: f.type, data: await fileToBase64(f) } });
+                const res = await fetchAI(parts, CONFIG.MOD1.SYSTEM);
+                const out = res.candidates[0].content.parts[0].text;
+                setOutput('mod1-output', marked.parse(out));
+                document.getElementById('m2-global-data').value = out;
+                showToast("特征脱水表已解析并同步");
+                
+                if (!isUpdate || isAutoCascade) {
+                    setTimeout(() => {
+                        switchTab('mod2');
+                        runModule2(false, true);
+                    }, 1000);
+                }
+            } catch(e) { setOutput('mod1-output', `<div class="p-4 bg-red-50 text-red-500 rounded-xl text-xs font-bold">❌ 错误: ${e.message}</div>`); }
+            finally { setLoading(isUpdate ? 'btn-update-m1' : 'btn-run-m1', false); }
+        }
+
+        async function runModule2(isUpdate, isAutoCascade = false) {
+            const pkg = document.getElementById('m2-global-data').value;
+            let comp = document.getElementById('m1-comp-info').value;
+            const s = document.getElementById('m2-supplement').value;
+            
+            if(!pkg) return showToast("缺少底层特征包裹！请先执行模块一。");
+            if (isUpdate && s) comp += "\n\n【补充修正要求】: " + s;
+            
+            setLoading(isUpdate ? 'btn-update-m2' : 'btn-run-m2', true);
+            setOutput('mod2-output', '<div class="text-center text-[var(--color-green)] mt-24"><div class="loader mb-3 border-[var(--color-green)]"></div><p class="text-xs font-semibold opacity-50">A10 文案引擎运转中...</p></div>');
+            
+            try {
+                const promptText = CONFIG.MOD2.PROMPT(pkg, comp, excelCsvData);
+                const res = await fetchAI([{ text: promptText }], CONFIG.MOD2.SYSTEM);
+                const out = res.candidates[0].content.parts[0].text;
+                setOutput('mod2-output', marked.parse(out));
+                
+                const match = out.match(/\[GEM2_START\]([\s\S]*?)\[GEM2_END\]/i);
+                const visualPkg = match ? match[1].trim() : out;
+                
+                document.getElementById('m3-gem2-pkg').value = visualPkg;
+                document.getElementById('m4-gem2-pkg').value = visualPkg;
+                document.getElementById('m5-gem2-pkg').value = visualPkg;
+                document.getElementById('m6-gem2-pkg').value = visualPkg;
+                showToast("A10 文案已生成，初始化包已全域同步");
+
+                if (isAutoCascade) {
+                    setTimeout(() => {
+                        switchTab('mod3');
+                        runModule3(true);
+                    }, 1000);
+                }
+            } catch(e) { setOutput('mod2-output', `<div class="p-4 bg-red-50 text-red-500 rounded-xl text-xs font-bold">❌ 错误: ${e.message}</div>`); }
+            finally { setLoading(isUpdate ? 'btn-update-m2' : 'btn-run-m2', false); }
+        }
+
+        async function runModule3(isAutoCascade = false) {
+            const pkg = document.getElementById('m3-gem2-pkg').value;
+            const fs = document.getElementById('m1-comp-images') ? document.getElementById('m1-comp-images').files : [];
+            
+            if(!pkg) return showToast("缺少初始化包裹！");
+            
+            setLoading('btn-run-m3', true);
+            setOutput('mod3-output', '<div class="text-center text-[var(--color-purple)] mt-24"><div class="loader mb-3 border-[var(--color-purple)]"></div><p class="text-xs font-semibold opacity-50">视觉总监指令规划中...</p></div>');
+            
+            try {
+                const parts = [{ text: CONFIG.MOD3.PROMPT(pkg) }];
+                for(let f of fs) parts.push({ inlineData: { mimeType: f.type, data: await fileToBase64(f) } });
+                const res = await fetchAI(parts, CONFIG.MOD3.SYSTEM);
+                const out = res.candidates[0].content.parts[0].text;
+                setOutput('mod3-output', marked.parse(out));
+                showToast("视觉规划指令已生成！");
+
+                if (isAutoCascade) {
+                    setTimeout(() => {
+                        switchTab('mod4');
+                        runModule4(true); 
+                    }, 1500);
+                }
+            } catch(e) { setOutput('mod3-output', `<div class="p-4 bg-red-50 text-red-500 rounded-xl text-xs font-bold">❌ 错误: ${e.message}</div>`); }
+            finally { setLoading('btn-run-m3', false); }
+        }
+
+        async function generateMainImage() {
+            const compImgs = document.getElementById('m1-comp-images') ? document.getElementById('m1-comp-images').files : [];
+            const prodImgs = document.getElementById('m1-image') ? document.getElementById('m1-image').files : [];
+            const imgs = compImgs.length > 0 ? compImgs : prodImgs;
+
+            if(imgs.length === 0) return showToast("请先在模块一中装载【竞品参考图】或【产品原图】！");
+            
+            const varsText = document.getElementById('m1-vars').value || "";
+            const skuMatch = varsText.match(/SKU[:：\s]*([A-Za-z0-9_-]+)/i);
+            const sku = skuMatch ? skuMatch[1] : "Item";
+            const filename = `${sku}_白底图.png`;
+
+            setLoading('btn-gen-main-img', true, "✨ 智能重绘新品 1:1 白底图");
+            const outDiv = document.getElementById('m3-main-img-output');
+            outDiv.classList.remove('hidden');
+            outDiv.innerHTML = '<div class="text-[13px] text-[var(--color-purple)] mt-4 font-medium flex items-center justify-center animate-fade-in"><div class="loader w-3.5 h-3.5 border-[var(--color-purple)] mr-2"></div> AI 正在执行高保真抠图与白底重绘中...</div>';
+
+            try {
+                const parts = [
+                    { text: "提取核心产品主体，严格去除所有背景、阴影、水印、文案，置于纯白底(RGB 255,255,255)正中央。要求：1:1正方形构图，照片级写实渲染，显著强化材质质感与光影细节，绝不改变产品的形状、颜色、尺寸、纹理。High-quality studio product photography, pure white background, centered." },
+                    { inlineData: { mimeType: imgs[0].type, data: await fileToBase64(imgs[0]) } }
+                ];
+                const res = await fetchAI(parts, "", true);
+                const imgData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData;
+
+                if(imgData) {
+                    const src = `data:${imgData.mimeType};base64,${imgData.data}`;
+                    outDiv.innerHTML = `
+                        <div class="mt-4 border border-[var(--border-color)] p-4 rounded-xl bg-[var(--bg-glass)] shadow-sm max-w-[220px] mx-auto animate-fade-in">
+                            <p class="text-[11px] text-[var(--color-green)] font-bold mb-3 flex items-center justify-center"><svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> 白底图高保真重绘完成</p>
+                            <img src="${src}" class="w-full object-contain mx-auto border border-[var(--border-color)] bg-white mb-3 rounded-lg shadow-sm cursor-pointer hover:opacity-80 transition-opacity" onclick="openImageModal(this.src)" title="点击全屏预览">
+                            <a href="${src}" download="${filename}" class="apple-btn apple-btn-primary block text-[11px] py-2 w-full flex items-center justify-center shadow-sm">
+                                <svg class="w-3.5 h-3.5 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                                下载入库 (${filename})
+                            </a>
+                        </div>`;
+                } else {
+                     outDiv.innerHTML = '<div class="text-[11px] text-[var(--color-red)] mt-4 font-bold animate-fade-in">⚠️ 引擎未返回图像数据，请检查网络或重试。</div>';
+                }
+            } catch (err) {
+                outDiv.innerHTML = `<div class="text-[11px] text-[var(--color-red)] mt-4 font-bold animate-fade-in">⚠️ 生图引擎异常: ${err.message}</div>`;
+                console.error(err);
+            } finally {
+                setLoading('btn-gen-main-img', false, "✨ 智能重绘新品 1:1 白底图");
+            }
+        }
+
+        let previousMod4Output = "";
+        
+        async function runModule4(auto = false) {
+            const pkg = document.getElementById('m4-gem2-pkg').value;
+            if(!pkg) return showToast("包裹未就绪");
+            setLoading('btn-run-m4', true);
+            
+            const mod4Wrapper = document.getElementById('mod4-output');
+            previousMod4Output = mod4Wrapper.innerHTML;
+            
+            setOutput('mod4-output', '<div class="text-center text-[var(--color-teal)] mt-24"><div class="loader mb-3 border-[var(--color-teal)]"></div><p class="text-xs font-semibold opacity-50">前置大数据特征解析与指令融合中...</p></div>');
+            
+            try {
+                const res = await fetchAI([{ text: CONFIG.MOD4.PROMPT(pkg) }], CONFIG.MOD4.SYSTEM);
+                const out = res.candidates[0].content.parts[0].text;
+                
+                const confirmUI = `
+                    <div id="m4-confirm-box" class="my-4 p-4 border border-[var(--color-blue)] bg-blue-50/50 rounded-xl flex items-center justify-between shadow-sm">
+                        <span class="text-xs font-bold text-[var(--color-blue)]">✨ 生成完毕！您对本次生成的中文生图指令是否满意？(下方文本框可直接修改提示词)</span>
+                        <div class="flex gap-2">
+                            <button onclick="acceptMod4()" class="apple-btn btn-green !py-1 !px-3 text-xs">✅ 满意，保留</button>
+                            <button onclick="rejectMod4()" class="apple-btn bg-red-500 text-white !py-1 !px-3 text-xs">❌ 不满意，退回上一版本</button>
+                        </div>
+                    </div>
+                `;
+                
+                setOutput('mod4-output', confirmUI + marked.parse(out));
+                injectModule4DOM(auto);
+            } catch(e) { setOutput('mod4-output', `<div class="p-4 bg-red-50 text-red-500 rounded-xl text-xs font-bold">❌ 错误: ${e.message}</div>`); }
+            finally { setLoading('btn-run-m4', false); }
+        }
+
+        window.acceptMod4 = function() {
+            const box = document.getElementById('m4-confirm-box');
+            if(box) box.remove();
+            showToast("版本已确认保留！");
+        };
+
+        window.rejectMod4 = function() {
+            if(previousMod4Output && !previousMod4Output.includes('等待执行')) {
+                document.getElementById('mod4-output').innerHTML = previousMod4Output;
+                showToast("已成功退回至上一版本。");
+            } else {
+                document.getElementById('mod4-output').innerHTML = `<div class="flex flex-col items-center justify-center h-full text-[var(--text-muted)] opacity-50"><p class="text-sm font-medium tracking-widest uppercase italic">等待执行 Ai 垫图分析</p></div>`;
+                showToast("已清空，请重新生成。");
+            }
+        };
+
+        function injectModule4DOM(auto) {
+            const outDiv = document.getElementById('mod4-output');
+            const tables = outDiv.querySelectorAll('table');
+            const tasks = [];
+            tables.forEach(table => {
+                const headers = Array.from(table.querySelectorAll('th')).map(th => th.innerText);
+                const isImageTable = headers.some(h => h.includes('适用图位') || h.includes('垫图裂变'));
+                
+                if(isImageTable) {
+                    const theadTr = table.querySelector('thead tr');
+                    if(theadTr) {
+                        const actionTh = document.createElement('th');
+                        actionTh.innerText = '执行操作 (1:1重绘)';
+                        actionTh.className = 'text-center font-bold text-[var(--color-blue)] whitespace-nowrap';
+                        theadTr.appendChild(actionTh);
+                    }
+
+                    const tbody = table.querySelector('tbody');
+                    if(!tbody) return;
+                    const rows = Array.from(tbody.querySelectorAll('tr'));
+                    
+                    rows.forEach(tr => {
+                        const actionTd = document.createElement('td');
+                        actionTd.className = 'text-center align-middle border-b border-[var(--border-color)]';
+                        actionTd.innerHTML = `<button class="gen-btn apple-btn apple-btn-primary py-1.5 px-3 text-[11px] shadow-sm whitespace-nowrap flex items-center justify-center mx-auto hover:scale-105 transition-transform"><svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg> 🎨 生成</button>`;
+                        tr.appendChild(actionTd);
+
+                        const cells = tr.querySelectorAll('td');
+                        let promptText = "Product scene generation";
+                        if(cells.length > 2) promptText = cells[2].innerText;
+
+                        const previewTr = document.createElement('tr');
+                        previewTr.className = 'hidden bg-[var(--bg-input)] transition-all duration-300';
+                        previewTr.innerHTML = `
+                            <td colspan="100%" class="p-4 border-b border-[var(--border-color)]">
+                                <div class="relative w-full max-w-2xl mx-auto rounded-xl overflow-hidden border border-[var(--border-color)] shadow-inner bg-[var(--bg-glass-heavy)] min-h-[220px] flex items-center justify-center">
+                                    <div class="loading-spinner hidden flex-col items-center justify-center text-[var(--color-teal)]">
+                                        <div class="loader mb-3 border-[var(--color-teal)] w-8 h-8"></div>
+                                        <span class="text-[12px] font-semibold text-[var(--text-primary)]">应用约束：保持尺寸、颜色...</span>
+                                        <span class="text-[10px] text-[var(--text-secondary)] mt-1 tracking-wide">解析参考图中，正在投喂大模型</span>
+                                    </div>
+                                    <img src="" class="preview-img hidden w-full max-h-[400px] object-contain cursor-zoom-in hover:opacity-90 transition p-2" alt="Generated Preview">
+                                </div>
+                            </td>
+                        `;
+                        tr.parentNode.insertBefore(previewTr, tr.nextSibling);
+
+                        const btn = actionTd.querySelector('.gen-btn');
+                        
+                        const execute = async () => {
+                            const currentPrompt = promptText;
+                            const imgNode = previewTr.querySelector('.preview-img');
+                            const spinner = previewTr.querySelector('.loading-spinner');
+                            
+                            previewTr.classList.remove('hidden');
+                            imgNode.classList.add('hidden');
+                            spinner.classList.remove('hidden');
+                            btn.disabled = true;
+                            btn.innerHTML = `<div class="loader !border-white !w-3 !h-3 !border-2 !mr-1"></div> 生成中`;
+
+                            try {
+                                const allImgs = [...(document.getElementById('m3-images') ? document.getElementById('m3-images').files : []), ...(document.getElementById('m4-images') ? document.getElementById('m4-images').files : [])];
+                                let base64Data = null;
+                                let mimeType = null;
+                                if(allImgs.length > 0) {
+                                    base64Data = await fileToBase64(allImgs[0]);
+                                    mimeType = allImgs[0].type;
+                                }
+
+                                const parts = [{ text: "强约束指令：不得改变产品的颜色和尺寸，比例严格参考图中的人物或物品。执行 Prompt：" + currentPrompt }];
+                                if(base64Data) {
+                                    parts.push({ inlineData: { mimeType: mimeType, data: base64Data } });
+                                }
+
+                                const res = await fetchAI(parts, "", true);
+                                const imgData = res.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData;
+
+                                if(imgData) {
+                                    const src = `data:${imgData.mimeType};base64,${imgData.data}`;
+                                    imgNode.src = src;
+                                    imgNode.classList.remove('hidden');
+                                    imgNode.onclick = () => openImageModal(src);
+                                } else {
+                                    throw new Error("模型未返回图像编码");
+                                }
+                            } catch (err) {
+                                showToast("生图拦截器异常：" + err.message);
+                                previewTr.classList.add('hidden');
+                            } finally {
+                                spinner.classList.add('hidden');
+                                btn.disabled = false;
+                                btn.innerHTML = `<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg> 🎨 生成`;
+                            }
+                        };
+                        btn.onclick = execute;
+                        if(auto) tasks.push(execute);
+                    });
+                }
+            });
+            if(auto && tasks.length > 0) {
+                (async () => {
+                    for(let i=0; i<tasks.length; i++){
+                        await tasks[i]();
+                        if(i < tasks.length - 1) { showToast(`防爆冷却 4.5s...`); await new Promise(r => setTimeout(r, 4500)); }
+                    }
+                })();
+            }
+        }
+
+        async function runModule5() {
+            const pkg = document.getElementById('m5-gem2-pkg').value;
+            const focus = document.getElementById('m5-qa-focus').value;
+
+            if (!pkg) return showToast("智控QA包裹未上链！");
+
+            setLoading('btn-run-m5', true, "一键生成 5 条拟人化 QA");
+            setOutput('mod5-output', `<div class="text-center text-[var(--color-orange)] mt-24"><div class="loader mb-3 border-[var(--color-orange)]"></div><p class="text-xs font-semibold opacity-50">分析痛点对冲数据，生成 QA 矩阵...</p></div>`);
+
+            try {
+                const res = await fetchAI([{ text: CONFIG.MOD5.PROMPT(pkg, focus) }], CONFIG.MOD5.SYSTEM);
+                setOutput('mod5-output', marked.parse(res.candidates[0].content.parts[0].text));
+                showToast("新品防御 QA 种草上链完毕。");
+            } catch (err) { setOutput('mod5-output', `<div class="text-[var(--color-red)] font-bold bg-red-50/10 border border-[var(--color-red)] p-4 rounded-xl text-sm">通信链断解: ${err.message}</div>`); } 
+            finally { setLoading('btn-run-m5', false, "一键生成 5 条拟人化 QA"); }
+        }
+
+        async function runModule6() {
+            const pkg = document.getElementById('m6-gem2-pkg').value;
+            if(!pkg) return showToast("智控包裹未上链！");
+            
+            setLoading('btn-run-m6', true, "生成 8秒视频 Prompt");
+            setOutput('mod6-output', `<div class="text-center text-pink-500 mt-24"><div class="loader mb-3 border-pink-500"></div><p class="text-xs font-semibold opacity-50">构思适配 8 秒模型的高转化运镜...</p></div>`);
+            
+            try {
+                const res = await fetchAI([{ text: CONFIG.MOD6.PROMPT(pkg) }], CONFIG.MOD6.SYSTEM);
+                setOutput('mod6-output', marked.parse(res.candidates[0].content.parts[0].text));
+                
+                const allImgs = [...(document.getElementById('m1-image') ? document.getElementById('m1-image').files : []), ...(document.getElementById('m1-comp-images') ? document.getElementById('m1-comp-images').files : [])];
+                
+                if (allImgs.length > 0) {
+                    let thumbsHtml = '<div class="mt-6 p-4 apple-glass rounded-xl shadow-inner animate-fade-in border border-pink-500/30">';
+                    thumbsHtml += '<p class="text-[12px] text-pink-600 font-bold mb-3 flex items-center">🎬 建议投喂视频大模型的源图库：</p><div class="flex flex-wrap gap-2">';
+                    for (let f of allImgs.slice(0, 4)) {
+                        if (!f.type.startsWith('image/')) continue;
+                        const b64 = await fileToBase64(f);
+                        thumbsHtml += `<div class="relative w-16 h-16 border border-gray-300 rounded-lg overflow-hidden bg-black shadow-sm"><img src="data:${f.type};base64,${b64}" class="object-cover w-full h-full opacity-90"><div class="absolute bottom-0 bg-pink-600/80 text-white text-[7px] w-full text-center py-0.5 truncate px-1">${f.name}</div></div>`;
+                    }
+                    thumbsHtml += '</div></div>';
+                    document.getElementById('mod6-output').innerHTML += thumbsHtml;
+                }
+                showToast("8秒极速视频运镜指令已生成");
+            } catch(e) { setOutput('mod6-output', `<div class="text-red-500 font-bold text-xs p-4 bg-red-50 rounded-lg">错误: ${e.message}</div>`); }
+            finally { setLoading('btn-run-m6', false, "生成 8秒视频 Prompt"); }
+        }
+
+        /* ==========================================================================
+           老品优化业务逻辑 (增量)
+           ========================================================================== */
+        async function handleOldKeywordUpload(e) {
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            oldExcelData = "";
+            let names = [];
+            showToast("正在解析老品数据表...");
+            try {
+                for(let file of files) {
+                    const data = await file.arrayBuffer();
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    oldExcelData += `\n--- [数据源: ${file.name}] ---\n` + XLSX.utils.sheet_to_csv(firstSheet);
+                    names.push(file.name);
+                }
+                showToast("✅ 老品词库/评论数据上链成功: " + names.join(', '));
+            } catch (err) {
+                showToast("❌ 数据表解析失败");
+                console.error(err);
+            }
+        }
+
+        function extractAmazonSource() {
+            const sourceInput = document.getElementById('old-m1-source-code');
+            const resultOutput = document.getElementById('old-m1-current-copy');
+            
+            if(!sourceInput || !resultOutput) {
+                console.error("未找到指定的输入或输出文本框，请检查选择器。");
+                return;
+            }
+            
+            const rawHTML = sourceInput.value;
+            if (!rawHTML || rawHTML.length < 500) {
+                resultOutput.value = "";
+                return; 
+            }
+            
+            try {
+                showToast("资深架构师自查引擎已介入，正在多维度解析源码...");
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(rawHTML, 'text/html');
+
+                const extractedData = [];
+
+                // 1. 提取品牌 (Marke)
+                const brandEl = doc.getElementById('bylineInfo') || doc.getElementById('brand');
+                let brand = brandEl ? brandEl.textContent.trim() : "";
+                if (brand) {
+                    brand = brand.replace(/^Visit the |^Besuchen Sie den | Store/gi, '').trim();
+                    extractedData.push(`【品牌 (Marke)】: ${brand}`);
+                }
+
+                // 2. 提取产品标题 (Produkttitel)
+                let titleText = doc.getElementById('productTitle')?.textContent.trim() || "";
+                if (!titleText) {
+                    const titleMatch = rawHTML.match(/<span id="productTitle"[^>]*>([\s\S]*?)<\/span>/i);
+                    if (titleMatch) titleText = titleMatch[1].replace(/<[^>]+>/g, '').trim();
+                }
+                if (titleText) extractedData.push(`【产品标题 (Produkttitel)】\n${titleText}`);
+
+                // 3. 提取五点描述 (Feature Bullets)
+                let bullets = [];
+                const bulletContainer = doc.getElementById('feature-bullets') || doc.getElementById('productFactsDesktopExpander');
+                
+                if (bulletContainer) {
+                    const liTags = bulletContainer.querySelectorAll('li:not(.a-hidden)');
+                    liTags.forEach(li => {
+                        const bulletText = li.textContent.replace(/\s+/g, ' ').trim();
+                        if (bulletText && bulletText.length > 5 && !bulletText.includes('Make sure this fits') && !bulletText.includes('›') && bulletText !== 'false') {
+                            bullets.push(`• ${bulletText}`);
+                        }
+                    });
+                }
+                
+                if (bullets.length === 0) {
+                    const fbBlockMatch = rawHTML.match(/id="(?:feature-bullets|featurebullets_feature_div|productFactsDesktopExpander)"[\s\S]{0,10000}?(?:<\/ul>)/i);
+                    if (fbBlockMatch) {
+                        const liRegex = /<li[^>]*>([\s\S]*?)<\/li>/gi;
+                        let match;
+                        while ((match = liRegex.exec(fbBlockMatch[0])) !== null) {
+                            let text = match[1].replace(/<style[\s\S]*?<\/style>/gi, '')
+                                             .replace(/<script[\s\S]*?<\/script>/gi, '')
+                                             .replace(/<[^>]*>?/gm, '')
+                                             .replace(/\s+/g, ' ')
+                                             .trim();
+                            if (text.length > 5 && !text.includes('Make sure') && !text.includes('›') && text !== 'false') {
+                                bullets.push(`• ${text}`);
+                            }
+                        }
+                    }
+                }
+
+                if (bullets.length > 0) {
+                    bullets = [...new Set(bullets)];
+                    extractedData.push(`【五点描述 (Feature Bullets 1-5)】\n${bullets.join('\n')}`);
+                }
+
+                // 4. 提取商品描述 (Product Description)
+                let description = '';
+                const descBlockMatch = rawHTML.match(/id="productDescription"[\s\S]{0,5000}?(?:<\/div>|<\/p>)/i);
+                if (descBlockMatch) {
+                    description = descBlockMatch[0].replace(/<style[\s\S]*?<\/style>/gi, '').replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+                } else if (doc.getElementById('productDescription')) {
+                    description = doc.getElementById('productDescription').textContent.replace(/\s+/g, ' ').trim();
+                }
+                if (description) {
+                    extractedData.push(`【商品描述 (Produktbeschreibungen)】\n${description.substring(0, 1500)}`);
+                }
+
+                // 5. 提取其他基础参数 (Others)
+                let otherInfo = [];
+                let asin = doc.getElementById('ASIN')?.value || '';
+                if (!asin) {
+                    const regexMatch = rawHTML.match(/"asin"\s*:\s*"([A-Z0-9]{10})"/i) || rawHTML.match(/name="ASIN" value="([A-Z0-9]{10})"/i);
+                    if (regexMatch) asin = regexMatch[1];
+                }
+                if (asin) otherInfo.push(`ASIN: ${asin}`);
+
+                let breadcrumbs = [];
+                doc.querySelectorAll('#wayfinding-breadcrumbs_feature_div li span.a-list-item a').forEach(a => { if(a.textContent.trim()) breadcrumbs.push(a.textContent.trim()); });
+                if (breadcrumbs.length > 0) otherInfo.push(`类目节点: ${breadcrumbs.join(' > ')}`);
+                
+                let bsrDiv = doc.getElementById('dpx-amazon-bestsellers_feature_div') || doc.querySelector('tr#SalesRank td');
+                if (bsrDiv) otherInfo.push(`BSR 排名: ${bsrDiv.textContent.replace(/\s+/g, ' ').trim().substring(0, 150)}`);
+
+                let buyBoxPrice = '';
+                const priceEls = doc.querySelectorAll('.apex-pricetopay-value, .a-price, #corePriceDisplay_desktop_feature_div .a-price .a-offscreen');
+                for (let el of priceEls) { if (el.textContent.trim() && el.textContent.includes('€')) { buyBoxPrice = el.textContent.trim().replace(/\s+/g, ''); break; } }
+                if (buyBoxPrice) otherInfo.push(`当前价: ${buyBoxPrice}`);
+
+                let wasPrice = '';
+                const wasPriceEls = doc.querySelectorAll('.a-text-price, .basisPrice .a-offscreen, #corePriceDisplay_desktop_feature_div .a-text-strike');
+                for (let el of wasPriceEls) { if (el.textContent.trim()) { wasPrice = el.textContent.trim().replace(/\s+/g, ''); break; } }
+                if (wasPrice) otherInfo.push(`划线价: ${wasPrice}`);
+
+                let discount = doc.querySelector('.savingsPercentage')?.textContent.trim() || '';
+                if (discount) otherInfo.push(`折扣: ${discount}`);
+
+                let coupon = '';
+                const promoBlock = doc.getElementById('promoPriceBlockMessage_feature_div');
+                if (promoBlock && (promoBlock.textContent.includes('Rabatt') || promoBlock.textContent.includes('Coupon'))) coupon = promoBlock.textContent.replace(/\s+/g, ' ').trim();
+                if (coupon) otherInfo.push(`优惠券: ${coupon}`);
+
+                let availability = doc.getElementById('availability')?.textContent.replace(/\s+/g, ' ').trim() || '';
+                if (availability) otherInfo.push(`库存状态: ${availability}`);
+
+                let prodOverview = [];
+                const poTable = doc.querySelector('#po-expander table, .a-normal.a-spacing-micro');
+                if (poTable) poTable.querySelectorAll('tr').forEach(tr => { const cells = tr.querySelectorAll('td, th, span'); if (cells.length >= 2) prodOverview.push(cells[0].textContent.trim() + ': ' + cells[1].textContent.trim()); });
+                if (prodOverview.length > 0) otherInfo.push(`基础参数: ${prodOverview.join(' | ')}`);
+
+                if (otherInfo.length > 0) {
+                    extractedData.push(`【其他参数 (Weitere Parameter)】\n${otherInfo.join('\n')}`);
+                }
+
+                // 执行聚合输出
+                if (extractedData.length > 0) {
+                    resultOutput.value = extractedData.join('\n\n');
+                    showToast("✅ 核心源码已成功通过极客引擎解析完成！");
+                } else {
+                    showToast("❌ 提取失败：未命中任何关键节点。");
+                }
+
+            } catch (e) {
+                console.error('深度提取源码异常', e);
+                showToast("❌ 扫描引擎抛出致命错误，请检查控制台。");
+            }
+        }
+
+        async function runOldModule1() {
+            const oldCopy = document.getElementById('old-m1-current-copy').value;
+            const imageFiles = document.getElementById('old-m1-image').files;
+            const lang = document.getElementById('m1-lang').value;
+            const country = document.getElementById('m1-country').value;
+            const brand = document.getElementById('m1-brand') ? document.getElementById('m1-brand').value.trim() : '';
+            
+            if(!oldCopy && imageFiles.length === 0) return showToast("老品优化必须提供当前文案或主图！");
+
+            setLoading('btn-run-old-m1', true, "✨ 启动全维优化审计");
+            setOutput('old-mod1-output', '<div class="text-center mt-24"><div class="loader"></div><p class="text-xs mt-3 opacity-50">正在对老品在线数据执行深度渗透诊断...</p></div>');
+
+            try {
+                let visualPkg = "未提供主图解析。";
+                if(imageFiles.length > 0) {
+                    let imageJsonData = "";
+                    setOutput('old-mod1-output', '<div class="text-center mt-24"><div class="loader"></div><p class="text-xs mt-3 opacity-50">第零阶段：正在将老品主图转化为高颗粒度 JSON 数据字典...</p></div>');
+                    try {
+                        const jsonParts = [{ text: "强制指令：将图片内容转化为极致颗粒度的 JSON 数据对象。字段必须严格包含：'materials'(材质反光/边角纹理细节), 'dimensions'(比例/尺寸绝对值估算), 'colors'(色彩Hex特征), 'texts'(图中文案/所有潜在的拼写错误与违规词), 'defects'(可见瑕疵/工艺问题), 'accessories'(配件), 'scenarios'(背景环境/光影架构)。直接输出纯 JSON，绝对不要包含任何 Markdown 标记或前缀解释。" }];
+                        for(let f of imageFiles) jsonParts.push({ inlineData: { mimeType: f.type, data: await fileToBase64(f) } });
+                        const jsonRes = await fetchAI(jsonParts, "你是一个严苛的图像转 JSON 解析引擎。绝对只输出合法的 JSON 字符串。");
+                        imageJsonData = "\n\n【底层图像 JSON 数据字典 (极高颗粒度锚点)】:\n" + jsonRes.candidates[0].content.parts[0].text;
+                        showToast("✅ 老品主图 JSON 结构化解析完成");
+                    } catch(err) {
+                        console.error("老品 JSON 解析流产", err);
+                        showToast("⚠️ JSON 解析超时，安全冗余通道已接管");
+                    }
+                    setOutput('old-mod1-output', '<div class="text-center mt-24"><div class="loader"></div><p class="text-xs mt-3 opacity-50">正在对老品在线数据执行深度渗透诊断...</p></div>');
+                    
+                    const vPrompt = "提取这张老品主图的物理特征，并特别检查图中是否有明显的单词拼写错误、排版混乱或不合规的中文字样。⚠️新增高颗粒度审核要求：请进行极度细致的像素级扫描。必须拆解产品的每一个独立部件、材质物理反光度、边角收口工艺、接缝处理方式、表面纹理特征、所有附件细节；并且提取图中所有隐藏的物理参数、警告语、尺寸标注、环境参照物比例对比。将这些极致颗粒度的特征毫无遗漏地输出，以并入后续的产品底层特征与纠错表四中。" + imageJsonData;
+                    const vParts = [{ text: vPrompt }];
+                    for(let f of imageFiles) vParts.push({ inlineData: { mimeType: f.type, data: await fileToBase64(f) } });
+                    const vRes = await fetchAI(vParts, "资深视觉诊断专家。");
+                    visualPkg = vRes.candidates[0].content.parts[0].text;
+                }
+
+                const finalPrompt = CONFIG.OLD_MOD1.PROMPT(oldCopy, oldExcelData, visualPkg, lang, country, brand);
+                const finalRes = await fetchAI([{ text: finalPrompt }], CONFIG.OLD_MOD1.SYSTEM);
+                const step1Output = finalRes.candidates[0].content.parts[0].text;
+
+                setOutput('old-mod1-output', '<div class="text-center mt-24"><div class="loader"></div><p class="text-xs mt-3 opacity-50">第一阶段架构完成。新增第二阶段：大模型合规风控官介入，执行强制全文洗稿与侵权词绞杀...</p></div>');
+                
+                const compliancePrompt = `🚨【最高级别生死红线二次审核任务】🚨
+作为亚马逊绝对严格的风控合规审查官，请对以下【初步生成的优化报告】进行地毯式交叉扫描。
+大模型在第一阶段可能产生了“食品级”等幻觉残留，你的唯一任务是：严格比对《防侵权与防认证词汇红线》，一旦在报告（特别是标题、五点、描述、ST）中发现以下绝对禁用词，必须强制替换为对应的“灰度转化词”！
+
+【红线词库死命令】：
+1. 食品类: 绝对禁用 Lebensmittelecht(食品级), Giftfrei(绝对无毒), Babysicher, BPA-frei -> 必须替换为: Geruchsneutral, Hygienisch im Alltag, Leicht zu reinigen, Hochwertiges Material.
+2. 带电类: 绝对禁用 CE-Zertifiziert, Explosionsgeschützt, Brandsicher -> 必须替换为: Zuverlässige Leistung, Hitzebeständiges Gehäuse, Stabiler Betrieb.
+3. 贴身类: 绝对禁用 Hypoallergen, Antibakteriell(抗菌), Medizinisch -> 必须替换为: Hautfreundlich, Atmungsaktiv, Sanft zur Haut, Ergonomisch.
+4. 环保类: 绝对禁用 100 % Umweltfreundlich, Biologisch abbaubar -> 必须替换为: Langlebig, Wiederverwendbar, Ressourcenschonend.
+5. 严禁任何: 儿童、婴儿、玩具 (kid, baby, toy 等) -> 必须替换为: 学生, 全家适用, 家居装饰.
+
+请输出一份【合规清洗后的完整优化报告】，务必保持原有所有的格式、表格、Markdown 语法、代码块和结构完全不变，仅仅替换掉违禁词汇！即使没有违禁词，也请完整输出全文！
+
+【初步生成的优化报告 (待清洗)】:
+${step1Output}`;
+                const complianceRes = await fetchAI([{ text: compliancePrompt }], "亚马逊最高级别风控审查官。强制清洗所有违禁词，并保持原格式输出全文。");
+                const step2CleanOutput = complianceRes.candidates[0].content.parts[0].text;
+
+                setOutput('old-mod1-output', '<div class="text-center mt-24"><div class="loader"></div><p class="text-xs mt-3 opacity-50">违禁词清洗完成。第三阶段：大模型算法官介入，针对合规版文案执行最终打分...</p></div>');
+                
+                const scorePrompt = `作为亚马逊首席A10算法与风控审核官。
+请基于以下【原 LISTING 文案】与【清洗后的 A10 重写 LISTING】，进行客观的满分 100 分制打分。
+必须严谨扫描重写后的标题、五点、描述。
+
+⚠️【最高强制防幻觉指令】：你现在的唯一任务是打分！你**只能**并且**必须只输出**《〇、新旧文案全维评分对比》这一个表格。
+**绝对禁止**重复输出、总结或修改任何原始文案、重写文案、以及表格2/3/4等其他诊断数据！绝不要有任何解释性废话！
+
+直接输出以下 Markdown 表格：
+
+### 〇、新旧文案全维评分对比 (大模型审核、分析、评分)
+| 评估项目 | 评分 (100分制) | 得分/扣分原因 |
+| :--- | :--- | :--- |
+| 原 LISTING 评分 | | |
+| 大模型 A10 标准重写 LISTING 评分 | | |
+
+【原 LISTING 文案】:
+${oldCopy}
+
+【清洗后的 A10 重写 LISTING】:
+${step2CleanOutput}
+`;
+                const scoreRes = await fetchAI([{ text: scorePrompt }], "亚马逊首席风控与算法审核官。严格并且只输出一个评分表格，禁止重复文案。");
+                const step3ScoreOutput = scoreRes.candidates[0].content.parts[0].text;
+
+                const combinedOutput = step3ScoreOutput + "\n\n" + step2CleanOutput;
+                setOutput('old-mod1-output', marked.parse(combinedOutput));
+
+                showToast("老品全维诊断报告及评分已安全生成。");
+            } catch(e) {
+                console.error("老品模块运行时异常: ", e);
+                setOutput('old-mod1-output', `<div class="p-4 bg-red-50 text-red-500 rounded-xl text-xs font-bold">诊断中断: ${e.message}</div>`);
+            } finally {
+                setLoading('btn-run-old-m1', false, "✨ 启动全维优化审计");
+            }
+        }
+
+        async function updateOldModule1() {
+            const supplement = document.getElementById('old-m1-supplement').value;
+            const currentOutput = document.getElementById('old-mod1-output').innerText;
+
+            if(!supplement) return showToast("请输入用户补充内容！");
+            if(!currentOutput || currentOutput.includes('等待注入老品数据')) return showToast("请先执行一次全维优化审计！");
+
+            setLoading('btn-update-old-m1', true, `<span class="text-[14px] mb-0.5">✨</span>融入补充<br>二次重写`);
+            const originalHTML = document.getElementById('old-mod1-output').innerHTML;
+            setOutput('old-mod1-output', '<div class="text-center mt-24"><div class="loader mb-3 border-[var(--color-orange)]"></div><p class="text-xs mt-3 opacity-50">正在审核用户补充内容并执行二次风控重写...</p></div>');
+
+            try {
+                const updatePrompt = `作为亚马逊风控合规审查官与 A10 算法专家。
+请审查以下用户的【补充要求】，并结合【当前已生成的优化报告】进行处理。
+
+【用户补充要求】:
+${supplement}
+
+【处理原则 (强制执行)】：
+1. 仔细审核用户的要求是否违反《防侵权与防认证词汇红线》（如要求加入“食品级”、“抗菌”、“CE认证”等违禁词汇），或者是否与产品的客观事实存在严重悖论。
+2. 如果大模型（你）认为用户的要求不对、违规或存在逻辑悖论，请在开头以 🚨【补充审核驳回】🚨 的形式明确指出原因，并**拒绝**该条修改，维持原文案。
+3. 如果用户的要求合理合规，请在开头以 ✅【补充审核通过】✅ 的形式简述采纳意见，并严格按照 A10 规范（FABE、不改变原参数、HTML包裹等）重新输出最新的【大模型静默风控审查及 A10 标准重写矩阵】（必须包含标题、五点、ST、HTML描述）。
+4. 无论是否通过，都必须在下方输出更新后的全维重写矩阵表（左侧目标语言，右侧中文翻译）。
+
+【当前已生成的优化报告】:
+${currentOutput}
+`;
+                const updateRes = await fetchAI([{ text: updatePrompt }], "亚马逊首席风控与算法审核官。严格审核用户请求并重写。");
+                const updateOutput = updateRes.candidates[0].content.parts[0].text;
+
+                const finalHTML = marked.parse(updateOutput) + '<hr class="my-8 border-dashed border-2 border-[var(--border-color)]">' + originalHTML;
+                setOutput('old-mod1-output', finalHTML);
+                
+                showToast("✅ 用户补充已审核并融入完成。");
+            } catch(e) {
+                console.error("补充重写异常", e);
+                setOutput('old-mod1-output', originalHTML); 
+                showToast("二次重写失败: " + e.message);
+            } finally {
+                setLoading('btn-update-old-m1', false, `<span class="text-[14px] mb-0.5">✨</span>融入补充<br>二次重写`);
+            }
+        }
+
+       /* ==========================================================================
+   老品优化：图片诊断与重构工作流 (OM2 核心引擎)
+   ========================================================================== */
+
+const OM2_CONFIG = {
+    maxRetries: 5,
+    baseDelays: [1000, 2000, 4000, 8000, 16000],
+    models: { 
+        text: "gemini-2.5-flash-preview-09-2025", 
+        imageGen: "gemini-2.5-flash-image-preview" 
+    },
+    psCanvasSize: "2000x2000"
+};
+
+const OM2_UIUtils = {
+    showToast: (msg) => {
+        if (typeof window.showToast === 'function') {
+            window.showToast(msg);
+        } else {
+            console.log("Toast:", msg);
+        }
+    },
+    setLoading: (btnId, isLoading, defaultText) => {
+        if (typeof window.setLoading === 'function') {
+            window.setLoading(btnId, isLoading, defaultText);
+        } else {
+            const btn = document.getElementById(btnId);
+            if (!btn) return;
+            btn.disabled = isLoading;
+            btn.innerHTML = isLoading ? '<div class="loader"></div> 生成中...' : defaultText;
+        }
+    },
+    stripBase64Prefix: (dataUrl) => dataUrl.replace(/^data:image\/(png|jpeg|webp|jpg);base64,/, ''),
+    escapeHtml: (str) => {
+        return (str || '').toString().replace(/[&<>"']/g, (m) => {
+            switch (m) {
+                case '&': return '&amp;';
+                case '<': return '&lt;';
+                case '>': return '&gt;';
+                case '"': return '&quot;';
+                case "'": return '&#39;';
+                default: return m;
+            }
+        });
+    }
+};
+
+const OM2_APIModule = {
+    async fetchWithRetry(url, payload, retriesLeft = OM2_CONFIG.maxRetries) {
+        if (retriesLeft < 0) throw new Error("API 重试次数已耗尽，已触发安全熔断机制");
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`API 异常状态码: ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            if (retriesLeft === 0) throw error;
+            const delay = OM2_CONFIG.baseDelays[OM2_CONFIG.maxRetries - retriesLeft] || 1000;
+            await new Promise(r => setTimeout(r, delay));
+            return this.fetchWithRetry(url, payload, retriesLeft - 1);
+        }
+    },
+
+    async analyzeListingAndImages(imagesDataUrls, title, bullets) {
+        if (!imagesDataUrls || imagesDataUrls.length === 0) throw new Error("无有效图像数据，已拦截请求");
+        
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${OM2_CONFIG.models.text}:generateContent?key=${apiKey}`;
+        const imageParts = imagesDataUrls.map(dataUrl => ({
+            inlineData: { mimeType: "image/jpeg", data: OM2_UIUtils.stripBase64Prefix(dataUrl) }
+        }));
+        
+        const promptText = `作为资深亚马逊运营专家，诊断以下Listing图文。解释用中文，错词需中外对照。
+        Listing标题：${title}
+        Listing五点：${bullets}`;
+        
+        const schema = {
+            type: "OBJECT",
+            properties: {
+                conflicts: { type: "ARRAY", items: { type: "STRING" } },
+                spelling_errors: { type: "ARRAY", items: { type: "STRING" } },
+                modification_suggestions: { type: "ARRAY", items: { type: "STRING" } }
+            }
+        };
+        
+        const payload = {
+            contents: [{ role: "user", parts: [{ text: promptText }, ...imageParts] }],
+            generationConfig: { responseMimeType: "application/json", responseSchema: schema }
+        };
+        
+        const result = await this.fetchWithRetry(url, payload);
+        if (!result.candidates || !result.candidates[0].content.parts[0].text) {
+            throw new Error("大模型返回数据结构异常");
+        }
+        return JSON.parse(result.candidates[0].content.parts[0].text);
+    },
+
+    async generateImageByReference(referenceDataUrl, prompt) {
+        if (!referenceDataUrl) throw new Error("缺失参考垫图，生图请求拦截");
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${OM2_CONFIG.models.imageGen}:generateContent?key=${apiKey}`;
+        const payload = {
+            contents: [{
+                role: "user",
+                parts: [
+                    { inlineData: { mimeType: "image/jpeg", data: OM2_UIUtils.stripBase64Prefix(referenceDataUrl) } },
+                    { text: prompt }
+                ]
+            }],
+            generationConfig: { responseModalities: ['TEXT', 'IMAGE'] } 
+        };
+        
+        const result = await this.fetchWithRetry(url, payload);
+        const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+        if (!imagePart) throw new Error("生图大模型未返回有效图像编码");
+        return `data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`;
+    },
+
+    async generateDesignSpec(imageDataUrl, title, bullets) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${OM2_CONFIG.models.text}:generateContent?key=${apiKey}`;
+        const promptText = `基于生成的商品纯图和Listing内容，设计3-5条高转化文案，并提供在${OM2_CONFIG.psCanvasSize}像素画框下的PS合成参数。
+        Listing标题：${title}
+        Listing五点：${bullets}
+        [强制要求]：分析图中构图和留白，给出精确坐标。语言必须匹配Listing所在国家市场，并附带中文对照。
+        [最高级别指令]：【放置位置】(placement) 字段必须严格使用中文描述坐标（例如：顶部居中, X: 1000, Y: 150）。绝不允许输出德语、英语等外语位置描述。`;
+        
+        const schema = {
+            type: "ARRAY",
+            items: {
+                type: "OBJECT",
+                properties: {
+                    copy: { type: "STRING", description: "外语原文" },
+                    placement: { type: "STRING", description: "放置位置描述与坐标" },
+                    translation: { type: "STRING", description: "中文释义" },
+                    font_style: { type: "STRING", description: "建议字体风格" },
+                    font_size: { type: "STRING", description: "字号大小" }
+                }
+            }
+        };
+        
+        const payload = {
+            contents: [{
+                role: "user",
+                parts: [
+                    { text: promptText },
+                    { inlineData: { mimeType: "image/jpeg", data: OM2_UIUtils.stripBase64Prefix(imageDataUrl) } }
+                ]
+            }],
+            generationConfig: { responseMimeType: "application/json", responseSchema: schema }
+        };
+        
+        const result = await this.fetchWithRetry(url, payload);
+        return JSON.parse(result.candidates[0].content.parts[0].text);
+    }
+};
+
+const OM2_ImageModule = {
+    images: [],
+    handleUpload(event) {
+        if (!event.target.files) return;
+        Array.from(event.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                this.images.push({ id: Date.now() + Math.random(), data: e.target.result });
+                this.renderThumbnails();
+            };
+            reader.readAsDataURL(file);
+        });
+        event.target.value = '';
+    },
+    removeImage(id) {
+        this.images = this.images.filter(img => img.id !== id);
+        this.renderThumbnails();
+    },
+    renderThumbnails() {
+        const container = document.getElementById('om2_thumbnailContainer');
+        if (!container) return;
+        container.innerHTML = this.images.map(img => `
+            <div class="relative w-[52px] h-[52px] border border-[var(--border-color)] rounded-lg overflow-hidden bg-[var(--bg-input)] flex-shrink-0 group">
+                <img src="${img.data}" class="object-cover w-full h-full cursor-pointer hover:opacity-80 transition" onclick="openImageModal('${img.data}')">
+                <button onclick="OM2_ImageModule.removeImage(${img.id})" class="absolute top-0.5 right-0.5 bg-red-500/90 text-white p-0.5 rounded shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+        `).join('');
+    }
+};
+
+const OM2_AnalysisModule = {
+    PROMPTS: [
+        { 
+            title: "1. 功能/卖点图 (材质工艺)", 
+            en: "Based on the provided reference images, generate a detailed, Amazon-style infographic specifically designed to highlight the product's materials and craftsmanship. The product itself should be centrally positioned and rendered with photorealistic fidelity. Extract visual elements such as visible textures, surface finishes, structural details, seam treatments, and material properties. Priority will be given to extracting material and structural attributes definitively identified. The overall design features a clean layout, refined supporting icons, and a background aesthetic that complements the product. [CRITICAL DIRECTIVE]: STRICTLY PROHIBIT any actual text, typography, letters, or words on the image. Use minimalist line-art symbols only. Leave pristine negative space for manual Photoshop compositing.",
+            zh: "居中且照片级逼真。分析并强化突显关键工艺特征（如纹理、表面处理、缝线、材质），并配合特写镜头或方向箭头。整体采用干净布局与纯白背景，严禁包含任何文字，预留出后期图文排版空间。"
+        },
+        { 
+            title: "2. 痛点反击 (多视角白底)", 
+            en: "Based on the product in the reference image, generate one image each: [front view, side view, back view, and top view]. White background, professional lighting, and photos must be taken strictly according to the proportions shown in the attached image. No modifications to the product design are permitted. [CRITICAL DIRECTIVE]: ZERO TEXT ALLOWED. This is a pure photographic layout. No words, no labels, no graphics. Clean output for PS canvas.",
+            zh: "生成正面、侧面、背面及顶部的纯多视角白底图。专业影棚布光，严格保持原产品的设计比例与细节，严禁改变形态。绝对不允许包含任何文案、标签或文字叠加。"
+        },
+        { 
+            title: "3. 单场景图 (核心功能使用场景)", 
+            en: "Based on the product depicted in the reference image, generate an Amazon product infographic. Analyze the product's usage scenarios and core technical features, reserving space within the top margin for a prominent headline. Employ a minimalist iconographic style to annotate 2 to 3 of the product's material properties, while incorporating ample negative space. The overall aesthetic should embody a modern minimalist sensibility, complemented by a soft, subtle gradient background. Utilize soft, studio-grade lighting; rendered at 8K resolution. [CRITICAL DIRECTIVE]: NO TEXT, NO WORDS, NO ACTUAL LABELS. Purely visual photography with blank spaces left for manual PS editing.",
+            zh: "分析核心使用场景。顶部留出空白区域供后期添加主标题。极简现代风格，带柔和渐变背景与影棚级柔光消除阴影。使用无字极简小图标标注2-3个材质属性，必须达到8K画质，绝对不能在图内生成实际文本。"
+        },
+        { 
+            title: "4. 四宫格场景图 (生活化受众)", 
+            en: "Based on the provided reference images, generate a four-panel grid of Amazon-style lifestyle scenes. The images should automatically infer the most suitable target audience, usage environments, and methods for showcasing product benefits. The product must be clearly visible and centrally positioned within each image. The overall lighting should utilize natural light, maintaining realistic proportions and shadow effects. The visuals should evoke an atmosphere of comfort or efficiency, rich in detail. [CRITICAL DIRECTIVE]: ABSOLUTELY NO TEXT, NO LETTERS, NO TYPOGRAPHY overlays are permitted on the images. Strictly adhere to professional Amazon commercial imagery design standards without text.",
+            zh: "自动推断适配的目标受众与使用环境，生成四宫格生活场景照片。自然光效，保持真实比例与阴影，营造舒适高效的氛围细节。严禁生成任何文字或排版干扰，要求极致纯净的生活化摄影风格。"
+        }
+    ],
+    async execute() {
+        if (OM2_ImageModule.images.length === 0) return OM2_UIUtils.showToast("请先上传参考图片");
+        const title = document.getElementById('om2_listingTitle').value.trim();
+        const bullets = document.getElementById('om2_listingBullets').value.trim();
+        if (!title || !bullets) return OM2_UIUtils.showToast("请完善 Listing 标题与五点文案");
+
+        OM2_UIUtils.setLoading('btn-run-old-m2', true, "");
+        try {
+            document.getElementById('om2_emptyState').classList.add('hidden');
+            document.getElementById('om2_resultsContainer').classList.remove('hidden');
+            document.getElementById('om2_analysisImages').innerHTML = OM2_ImageModule.images.map(img => `<img src="${img.data}" class="w-full h-20 object-cover border border-[var(--border-color)] rounded-lg">`).join('');
+            document.getElementById('om2_analysisText').innerHTML = `<div class="p-4 text-center"><div class="loader"></div></div>`;
+            
+            const data = await OM2_APIModule.analyzeListingAndImages(OM2_ImageModule.images.map(i => i.data), title, bullets);
+            this.renderResult(data);
+            this.renderWorkflows();
+        } catch (e) {
+            console.error("OM2 分析异常", e);
+            OM2_UIUtils.showToast("大模型诊断失败，请检查网络或重试");
+            document.getElementById('om2_analysisText').innerHTML = `<div class="text-[var(--color-red)] text-xs font-bold bg-red-50 p-3 rounded">❌ 诊断解析中断: ${e.message}</div>`;
+        } finally {
+            OM2_UIUtils.setLoading('btn-run-old-m2', false, "✨ 执行大模型诊断与策略生成");
+        }
+    },
+    renderResult(data) {
+        const container = document.getElementById('om2_analysisText');
+        if (!container) return;
+        const suggestions = Array.isArray(data.modification_suggestions) && data.modification_suggestions.length > 0 
+            ? data.modification_suggestions 
+            : ["未检测到严重冲突，保持现有图像策略或按常规优化进行。"];
+            
+        container.innerHTML = `
+            <div class="space-y-3">
+                <div class="text-[var(--color-red)] bg-red-50/50 p-2 rounded text-[11px] font-bold uppercase border border-red-100/50">诊断与修复建议</div>
+                <ul class="list-disc pl-5 space-y-1">${suggestions.map(s => `<li>${OM2_UIUtils.escapeHtml(s)}</li>`).join('')}</ul>
+            </div>`;
+    },
+    renderWorkflows() {
+        const container = document.getElementById('om2_promptsContainer');
+        if (!container) return;
+        container.innerHTML = this.PROMPTS.map((p, i) => `
+            <div class="border border-[var(--border-color)] rounded-xl bg-white overflow-hidden shadow-sm">
+                <div class="bg-[var(--table-header-bg)] px-4 py-3 border-b border-[var(--border-color)] flex justify-between items-center">
+                    <h4 class="font-bold text-[13px] text-[var(--text-primary)]">${p.title}</h4>
+                    <button id="om2_btnGen_${i}" onclick="OM2_GenerationModule.startGeneration(${i})" class="apple-btn btn-purple !py-1.5 !px-3 text-[11px] w-24 flex justify-center items-center transition-colors">开始生成</button>
+                </div>
+                <div class="p-4">
+                    <div class="text-[10px] text-[var(--text-muted)] font-mono mb-1 uppercase font-bold">System Directive (Hidden Constraint)</div>
+                    <div class="text-[10px] text-[var(--text-secondary)] mb-3 bg-[var(--bg-input)] p-2 rounded-lg font-mono break-words max-h-16 overflow-y-auto">${p.en}</div>
+                    
+                    <div class="text-[10px] text-[var(--color-purple)] font-bold mb-1 uppercase">中文控制指令 (可二次修改)</div>
+                    <textarea id="om2_promptZh_${i}" class="w-full border border-[var(--color-purple)]/30 rounded-lg p-2 text-[11px] text-[var(--text-primary)] bg-[var(--color-purple)]/5 mb-3 resize-none focus:outline-none focus:border-[var(--color-purple)]" rows="2">${p.zh}</textarea>
+
+                    <div id="om2_outputArea_${i}" class="hidden flex flex-col gap-3 border-t border-[var(--border-color)] border-dashed pt-4 mt-2">
+                        <div class="flex justify-between items-center">
+                            <div class="text-[12px] font-bold text-[var(--text-primary)]">✨ 生成结果展示区:</div>
+                            <div class="flex items-center gap-2">
+                                <button id="om2_btnToggleEdit_${i}" onclick="OM2_CanvasModule.toggleEditMode(${i})" class="apple-btn apple-btn-secondary !py-1 !px-2.5 text-[10px] flex items-center gap-1 transition-colors">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                    <span id="om2_txtToggleEdit_${i}">开启涂改</span>
+                                </button>
+                                <div class="flex items-center gap-1 border-l border-[var(--border-color)] pl-2">
+                                    <input type="range" id="om2_brushSize_${i}" min="5" max="80" value="15" title="笔刷大小" class="w-16 om2-slider">
+                                </div>
+                                <button onclick="OM2_CanvasModule.clearCanvas(${i})" class="apple-btn bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 !py-1 !px-2 text-[10px] ml-1 transition-colors" title="清除痕迹">清除</button>
+                            </div>
+                        </div>
+
+                        <div class="relative w-full aspect-square bg-[var(--bg-input)] border border-[var(--border-color)] rounded-lg overflow-hidden shadow-inner">
+                            <canvas id="om2_canvas_${i}" class="absolute top-0 left-0 w-full h-full object-contain om2-mode-zoom"></canvas>
+                        </div>
+                        
+                        <div class="flex flex-col gap-2 mt-2">
+                            <textarea id="om2_refineText_${i}" class="apple-input resize-none h-10 text-[11px]" placeholder="补充框: 输入针对红线涂改部分的具体修改意见..."></textarea>
+                            <div class="flex flex-wrap gap-2">
+                                <button id="om2_btnCustom_${i}" onclick="OM2_GenerationModule.executeCustomRefinement(${i})" class="flex-1 apple-btn apple-btn-primary !py-2 text-[11px] transition-colors">执行涂鸦修改</button>
+                                <button id="om2_btnPro_${i}" onclick="OM2_GenerationModule.executeProRefinement(${i})" class="flex-1 apple-btn bg-slate-800 hover:bg-slate-900 text-white !py-2 text-[11px] flex items-center justify-center gap-1 transition-colors">
+                                    <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>PRO模型精修
+                                </button>
+                                <button onclick="OM2_GenerationModule.downloadImage(${i})" class="apple-btn btn-teal hover:opacity-90 !py-2 !px-4 text-[11px] transition-opacity">下载</button>
+                            </div>
+                        </div>
+                        <div id="om2_designSpecArea_${i}" class="mt-4 hidden"></div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+};
+
+const OM2_GenerationModule = {
+    state: {},
+    timers: {},
+    simulateProgress(btnId) {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        btn.disabled = true;
+        let progress = 0;
+        this.timers[btnId] = setInterval(() => {
+            progress += Math.floor(Math.random() * 4) + 1;
+            if (progress > 99) progress = 99;
+            btn.innerHTML = `<div class="loader !border-white !w-3 !h-3 !border-2"></div><span class="ml-1">${progress}%</span>`;
+        }, 300);
+    },
+    stopProgress(btnId, defaultHtml) {
+        if(this.timers[btnId]) { 
+            clearInterval(this.timers[btnId]); 
+            delete this.timers[btnId]; 
+        }
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+        btn.disabled = false;
+        btn.innerHTML = defaultHtml;
+    },
+    async startGeneration(index) {
+        const btnId = `om2_btnGen_${index}`;
+        this.simulateProgress(btnId);
+        try {
+            const title = document.getElementById('om2_listingTitle').value.trim();
+            const bullets = document.getElementById('om2_listingBullets').value.trim();
+            const baseEnPrompt = OM2_AnalysisModule.PROMPTS[index].en;
+            const userZhPrompt = document.getElementById(`om2_promptZh_${index}`).value.trim();
+            
+            const prompt = `[Execution ID: ${Date.now()}]\nSYSTEM DIRECTIVE: ${baseEnPrompt}\nUSER CUSTOM INSTRUCTION: "${userZhPrompt}"\nListing Context -> Title: "${title}", Bullets: "${bullets}".\n[ABSOLUTE HIGHEST DIRECTIVE]: STRICTLY FORBIDDEN to generate any text, words, or letters on the image. Leave clean space for Photoshop.`;
+            
+            const dataUrl = await OM2_APIModule.generateImageByReference(OM2_ImageModule.images[0].data, prompt);
+            this.state[index] = { originalImage: dataUrl };
+            document.getElementById(`om2_outputArea_${index}`).classList.remove('hidden');
+            setTimeout(() => {
+                OM2_CanvasModule.initCanvas(index, dataUrl);
+                this.executeDesignDiagnosis(index);
+            }, 50);
+            OM2_UIUtils.showToast("生图流转完成");
+            
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                btn.classList.remove('btn-purple');
+                btn.classList.add('btn-green');
+                btn.setAttribute('data-generated', 'true');
+            }
+        } catch (e) {
+            console.error("OM2生图异常", e);
+            OM2_UIUtils.showToast("生图拦截器报错，请检查网络或更换参考图");
+        } finally {
+            const btn = document.getElementById(btnId);
+            const nextText = btn && btn.getAttribute('data-generated') === 'true' ? '重新生成' : '开始生成';
+            this.stopProgress(btnId, nextText);
+        }
+    },
+    async executeDesignDiagnosis(index) {
+        const container = document.getElementById(`om2_designSpecArea_${index}`);
+        if (!container) return;
+        container.innerHTML = `<div class="p-4 text-center"><div class="loader"></div></div>`;
+        container.classList.remove('hidden');
+        try {
+            const spec = await OM2_APIModule.generateDesignSpec(this.state[index].originalImage, document.getElementById('om2_listingTitle').value, document.getElementById('om2_listingBullets').value);
+            container.innerHTML = `
+                <div class="mt-4 border-t border-[var(--border-color)] pt-4">
+                    <span class="text-[11px] font-bold text-[var(--color-purple)]">PS 文案合成蓝图</span>
+                    <table class="w-full mt-2 text-[10px] text-left border-collapse border border-[var(--border-color)] rounded-lg overflow-hidden">
+                        <thead class="bg-[var(--table-header-bg)]">
+                            <tr><th class="p-2 border-b border-r border-[var(--border-color)]">文案</th><th class="p-2 border-b border-r border-[var(--border-color)]">位置</th><th class="p-2 border-b border-r border-[var(--border-color)]">翻译</th><th class="p-2 border-b border-r border-[var(--border-color)]">建议字体</th><th class="p-2 border-b border-[var(--border-color)]">字号</th></tr>
+                        </thead>
+                        <tbody>
+                            ${spec.map(item => `<tr><td class="p-2 border-b border-r border-[var(--border-color)] font-medium">${OM2_UIUtils.escapeHtml(item.copy)}</td><td class="p-2 border-b border-r border-[var(--border-color)]">${OM2_UIUtils.escapeHtml(item.placement)}</td><td class="p-2 border-b border-r border-[var(--border-color)]">${OM2_UIUtils.escapeHtml(item.translation)}</td><td class="p-2 border-b border-r border-[var(--border-color)]">${OM2_UIUtils.escapeHtml(item.font_style)}</td><td class="p-2 border-b border-[var(--border-color)]">${OM2_UIUtils.escapeHtml(item.font_size)}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+        } catch (e) { 
+            // 静默处理，不阻断主流程
+            container.innerHTML = '<div class="text-[10px] text-orange-500 mt-2">提示：设计合成蓝图生成超时或数据结构异常。</div>'; 
+        } 
+    },
+
+    async executeProRefinement(index) {
+        const btnId = `om2_btnPro_${index}`;
+        const defaultHtml = `<svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>PRO模型精修`;
+        const prompt = `[ULTRA-HD 8K SUPER-RESOLUTION TASK - ID: ${Date.now()}]\nAct as a high-end commercial macro-photographer.\n[CRITICAL MANDATE]: DO NOT apply any AI smoothing, denoising, or painting filters.\n1. UPSIDE RESOLUTION: Treat input as RAW file. Upscale to true 8K definition.\n2. TEXTURE REVEAL: Maximally amplify micro-textures (pores, grains, metallic flakes, fabric weaves).\n3. RAZOR-SHARP FOCUS: Render with f/16 aperture equivalent optical sharpness. Crisp edge contrast.\n4. LIGHTING: Enhance specular highlights and micro-shadows to emphasize tactile 3D depth.\n[STRICT PROHIBITION]: NO TEXT. NO TYPOGRAPHY. PRESERVE EXACT ORIGINAL GEOMETRY. THE OUTPUT MUST BE ABSOLUTELY TACTILE AND SHARPER THAN INPUT.`;
+        await this._processRefinement(index, btnId, prompt, defaultHtml);
+    },
+
+    async executeCustomRefinement(index) {
+        const feedback = document.getElementById(`om2_refineText_${index}`).value.trim();
+        if (!feedback) return OM2_UIUtils.showToast("请输入红线区域的具体修改意见");
+        const prompt = `[MANDATORY TARGETED EDIT - Execution ID: ${Date.now()}]\nModify ONLY the specific areas marked with red annotations in the provided image.\nExecute this instruction strictly on the marked areas: "${feedback}".\n[CRITICAL]: DO NOT alter the unmasked areas. Maintain the original product shape and background outside the red lines. ABSOLUTELY NO TEXT OR TYPOGRAPHY ALLOWED. Ensure seamless blending.`;
+        await this._processRefinement(index, `om2_btnCustom_${index}`, prompt, "执行涂鸦修改");
+    },
+    
+    async _processRefinement(index, btnId, prompt, defaultHtml) {
+        const canvas = document.getElementById(`om2_canvas_${index}`);
+        if (!canvas) return;
+        
+        const exportCanvas = document.createElement('canvas');
+        exportCanvas.width = canvas.width; exportCanvas.height = canvas.height;
+        const ctx = exportCanvas.getContext('2d');
+        ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(canvas, 0, 0);
+        
+        this.simulateProgress(btnId);
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1500)); // 安全缓冲防大模型并发降智
+            const dataUrl = await OM2_APIModule.generateImageByReference(exportCanvas.toDataURL("image/jpeg", 1.0), prompt);
+            
+            this.state[index].originalImage = dataUrl;
+            OM2_CanvasModule.initCanvas(index, dataUrl);
+            
+            const specArea = document.getElementById(`om2_designSpecArea_${index}`);
+            if (specArea) specArea.classList.add('hidden');
+            
+            if(btnId.includes("btnCustom")) {
+                document.getElementById(`om2_refineText_${index}`).value = ''; 
+            }
+            
+            setTimeout(() => this.executeDesignDiagnosis(index), 100);
+            OM2_UIUtils.showToast("精修执行成功");
+        } catch (e) { 
+            console.error("精修流产", e);
+            OM2_UIUtils.showToast("精修异常阻断，请重试"); 
+        } finally { 
+            this.stopProgress(btnId, defaultHtml); 
+        }
+    },
+    
+    downloadImage(index) {
+        const st = this.state[index];
+        if (!st || !st.originalImage) return OM2_UIUtils.showToast("无法下载未就绪的图像");
+        const a = document.createElement('a'); 
+        a.href = st.originalImage; 
+        a.download = `AMZ_VisionPro_8K_${Date.now()}.jpg`; 
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+};
+
+const OM2_CanvasModule = {
+    instances: {},
+    initCanvas(index, imageUrl) {
+        const canvas = document.getElementById(`om2_canvas_${index}`);
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+            canvas.width = img.width; canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            this.instances[index] = { 
+                ctx, 
+                imgObj: img, 
+                isDrawing: false, 
+                isEditingMode: false, 
+                width: img.width, 
+                height: img.height 
+            };
+            this.attachEvents(index, canvas);
+        };
+        img.src = imageUrl;
+    },
+    clearCanvas(index) {
+        const inst = this.instances[index];
+        if (!inst) return;
+        inst.ctx.clearRect(0, 0, inst.width, inst.height);
+        inst.ctx.drawImage(inst.imgObj, 0, 0);
+    },
+    toggleEditMode(index) {
+        const inst = this.instances[index];
+        if (!inst) return;
+        const canvas = document.getElementById(`om2_canvas_${index}`);
+        const btn = document.getElementById(`om2_btnToggleEdit_${index}`);
+        const txt = document.getElementById(`om2_txtToggleEdit_${index}`);
+        
+        inst.isEditingMode = !inst.isEditingMode;
+        
+        if (inst.isEditingMode) {
+            canvas.classList.replace('om2-mode-zoom', 'om2-mode-draw');
+            btn.classList.add('!bg-[var(--color-blue)]', 'text-white');
+            if (txt) txt.innerText = "退出涂改";
+        } else {
+            canvas.classList.replace('om2-mode-draw', 'om2-mode-zoom');
+            btn.classList.remove('!bg-[var(--color-blue)]', 'text-white');
+            if (txt) txt.innerText = "开启涂改";
+        }
+    },
+    attachEvents(index, canvas) {
+        // 深拷贝重建DOM以彻底清空旧的事件监听器，避免事件泄露或重复触发
+        const clone = canvas.cloneNode(true); 
+        canvas.parentNode.replaceChild(clone, canvas);
+        const newCanvas = document.getElementById(`om2_canvas_${index}`);
+        
+        const inst = this.instances[index];
+        if (!inst) return;
+        
+        inst.ctx = newCanvas.getContext('2d');
+        inst.ctx.drawImage(inst.imgObj, 0, 0);
+        
+        // 锁定红色画笔设定
+        inst.ctx.strokeStyle = 'rgba(255, 69, 58, 0.75)'; 
+        inst.ctx.lineCap = 'round';
+        
+        const getPos = (e) => {
+            const r = newCanvas.getBoundingClientRect();
+            const sX = newCanvas.width / r.width; 
+            const sY = newCanvas.height / r.height;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return { x: (clientX - r.left) * sX, y: (clientY - r.top) * sY };
+        };
+        
+        const start = (e) => {
+            if (!inst.isEditingMode) {
+                // 若不在涂抹模式，调用 File_A 的全局函数弹出灯箱
+                if (typeof openImageModal === 'function') {
+                    openImageModal(inst.imgObj.src);
+                }
+                return;
+            }
+            e.preventDefault(); 
+            inst.isDrawing = true;
+            
+            const slider = document.getElementById(`om2_brushSize_${index}`);
+            inst.ctx.lineWidth = slider ? parseInt(slider.value) : (inst.width / 150);
+            
+            const p = getPos(e); 
+            inst.ctx.beginPath(); 
+            inst.ctx.moveTo(p.x, p.y);
+        };
+        
+        const move = (e) => { 
+            if (!inst.isDrawing) return; 
+            const p = getPos(e); 
+            inst.ctx.lineTo(p.x, p.y); 
+            inst.ctx.stroke(); 
+        };
+        
+        const stop = () => { 
+            if (inst.isDrawing) { 
+                inst.ctx.closePath(); 
+                inst.isDrawing = false; 
+            } 
+        };
+        
+        // 绑定PC端事件
+        newCanvas.addEventListener('mousedown', start); 
+        newCanvas.addEventListener('mousemove', move); 
+        window.addEventListener('mouseup', stop);
+        
+        // 绑定移动端事件，passive:false 允许阻止默认的页面滚动
+        newCanvas.addEventListener('touchstart', start, {passive:false}); 
+        newCanvas.addEventListener('touchmove', move, {passive:false}); 
+        newCanvas.addEventListener('touchend', stop);
+    }
+};
+
+        function syncThumbnails() { 
+            const render = (files, targetId) => {
+                const container = document.getElementById(targetId);
+                if (!container) return;
+                container.innerHTML = '';
+                Array.from(files).forEach(f => {
+                    const url = URL.createObjectURL(f);
+                    container.innerHTML += `<div class="relative w-[52px] h-[52px] border border-[var(--border-color)] rounded-lg overflow-hidden bg-[var(--bg-input)] flex-shrink-0"><img src="${url}" class="object-cover w-full h-full"><div class="absolute bottom-0 bg-black/60 text-white text-[8px] w-full text-center leading-none py-0.5 truncate px-0.5">${f.name}</div></div>`;
+                });
+            };
+            if(document.getElementById('m1-image')) render(document.getElementById('m1-image').files, 'm1-thumbnails');
+            if(document.getElementById('m1-comp-images')) render(document.getElementById('m1-comp-images').files, 'm1-comp-thumbnails');
+            
+            const m4Container = document.getElementById('m4-inherited-thumbnails');
+            if(m4Container) {
+                m4Container.innerHTML = '';
+                const m1Files = document.getElementById('m1-image') ? document.getElementById('m1-image').files : [];
+                const m1CompFiles = document.getElementById('m1-comp-images') ? document.getElementById('m1-comp-images').files : [];
+                [...m1Files, ...m1CompFiles].forEach(f => {
+                    const url = URL.createObjectURL(f);
+                    m4Container.innerHTML += `<img src="${url}" class="w-8 h-8 object-cover rounded border border-gray-300 shadow-sm" title="${f.name}">`;
+                });
+            }
+        }
+
+        function syncOldThumbnails() {
+            const container = document.getElementById('old-m1-thumbnails');
+            if (!container) return;
+            container.innerHTML = '';
+            Array.from(document.getElementById('old-m1-image').files).forEach(f => {
+                const url = URL.createObjectURL(f);
+                container.innerHTML += `<div class="relative w-[52px] h-[52px] border border-[var(--border-color)] rounded-lg overflow-hidden bg-[var(--bg-input)] flex-shrink-0"><img src="${url}" class="object-cover w-full h-full"><div class="absolute bottom-0 bg-black/60 text-white text-[8px] w-full text-center leading-none py-0.5 truncate px-0.5">${f.name}</div></div>`;
+            });
+        }
+
+        function syncOldM2Thumbnails() {
+            const render = (files, targetId) => {
+                const container = document.getElementById(targetId);
+                if (!container) return;
+                container.innerHTML = '';
+                Array.from(files).forEach(f => {
+                    const url = URL.createObjectURL(f);
+                    container.innerHTML += `<div class="relative w-[52px] h-[52px] border border-[var(--border-color)] rounded-lg overflow-hidden bg-[var(--bg-input)] flex-shrink-0"><img src="${url}" class="object-cover w-full h-full"><div class="absolute bottom-0 bg-black/60 text-white text-[8px] w-full text-center leading-none py-0.5 truncate px-0.5">${f.name}</div></div>`;
+                });
+            };
+            if(document.getElementById('old-m2-image')) render(document.getElementById('old-m2-image').files, 'old-m2-thumbnails');
+            if(document.getElementById('old-m2-comp-image')) render(document.getElementById('old-m2-comp-image').files, 'old-m2-comp-thumbnails');
+        }
+
+        function handleKeywordUpload(e) { 
+            const reader = new FileReader(); 
+            reader.onload = (evt) => { excelCsvData = evt.target.result; showToast("新品词库已上链"); }; 
+            reader.readAsText(e.target.files[0]); 
+        }
+
+        /* ==========================================================================
+           集合与 Tabs 路由控制
+           ========================================================================== */
+        function switchCollection(colId) {
+            document.querySelectorAll('#top-collection-nav .apple-nav-btn').forEach(btn => {
+                btn.classList.remove('active', '!bg-[var(--color-blue)]', '!text-white', '!border-[var(--color-blue)]', 'shadow-md');
+            });
+            const activeBtn = document.getElementById(`btn-col-${colId}`);
+            if (activeBtn) {
+                activeBtn.classList.add('active', '!bg-[var(--color-blue)]', '!text-white', '!border-[var(--color-blue)]', 'shadow-md');
+            }
+
+            document.querySelectorAll('.collection-subnav').forEach(nav => {
+                nav.classList.add('hidden');
+                nav.classList.remove('flex');
+            });
+            const activeSubnav = document.getElementById(`subnav-${colId}`);
+            if (activeSubnav) {
+                activeSubnav.classList.remove('hidden');
+                activeSubnav.classList.add('flex');
+            }
+
+            document.querySelectorAll('.collection-workspace').forEach(ws => {
+                ws.classList.add('hidden');
+                ws.classList.remove('flex');
+            });
+            const activeWorkspace = document.getElementById(`workspace-${colId}`);
+            if (activeWorkspace) {
+                activeWorkspace.classList.remove('hidden');
+                activeWorkspace.classList.add('flex');
+            }
+            
+            if(colId === 'new') switchTab('mod1');
+            else switchTab('old-mod1');
+        }
+
+        function switchTab(id) {
+            const allTabs = document.querySelectorAll('.tab-content');
+            if(allTabs) allTabs.forEach(t => t.classList.remove('active'));
+            const inputEl = document.getElementById(id + '-inputs'); 
+            if(inputEl) inputEl.classList.add('active');
+            
+            const allOutputs = document.querySelectorAll('.output-wrapper');
+            if(allOutputs) allOutputs.forEach(o => o.classList.remove('active'));
+            const outputEl = document.getElementById(id + '-output-wrapper'); 
+            if(outputEl) outputEl.classList.add('active');
+            
+            const allNavs = document.querySelectorAll('.apple-nav-btn');
+            if(allNavs) allNavs.forEach(n => n.classList.remove('active'));
+            const btn = document.getElementById('btn-' + id); 
+            if(btn) btn.classList.add('active');
+        }
+
+        function toggleViewMode() {
+            const panels = document.querySelectorAll('#control-panel, #old-control-panel');
+            panels.forEach(p => p.classList.toggle('hidden'));
+        }
+
+        function executeUnifiedExport() {
+            const type = document.getElementById('unified-export-type').value;
+            if (type === 'source' || type === 'blueprint') {
+                executeSysDownload();
+            } else if (type === 'excel' || type === 'ppt') {
+                executeDataExport();
+            }
+        }
+
+        function executeSysDownload() {
+            const type = document.getElementById('unified-export-type').value;
+            if (type === 'source') {
+                const clone = document.documentElement.cloneNode(true);
+                const emptySVG = `<div class="flex flex-col items-center justify-center h-full text-[var(--text-muted)] opacity-50"><p class="text-sm font-medium tracking-widest uppercase italic">等待执行模块</p></div>`;
+                clone.querySelectorAll('.markdown-body').forEach(el => el.innerHTML = emptySVG);
+                clone.querySelectorAll('textarea').forEach(el => { if(!el.id.includes('pkg')) el.value = ''; });
+                clone.querySelectorAll('input[type="text"]').forEach(el => el.value = '');
+                clone.querySelectorAll('div[id$="-thumbnails"]').forEach(el => el.innerHTML = '');
+                clone.querySelectorAll('#m3-main-img-output').forEach(el => { el.innerHTML = ''; el.classList.add('hidden'); }); 
+                
+                const blob = new Blob([clone.outerHTML], { type: 'text/html' });
+                saveAs(blob, "A10_OMNI_HUB_V5.57_满血版.html");
+                showToast("系统源码备份已安全导出");
+            } else {
+                let content = `# A10 OMNI-HUB 全维指令蓝图 (V5.57)\n\n## 1. 全局规范\n${RULES.GLOBAL}\n\n## 2. A10 文案\n${RULES.A10}\n\n## 3. 视觉与防爆\n${RULES.VISUAL}\n\n`;
+                content += `## 4. 模块一 (图像解析)\n**SYSTEM**:\n${CONFIG.MOD1.SYSTEM}\n**PROMPT_TEMPLATE**:\n${CONFIG.MOD1.PROMPT("[语言]", "[国家]", "[简述]")}\n\n`;
+                content += `## 5. 模块二 (A10 文案)\n**SYSTEM**:\n${CONFIG.MOD2.SYSTEM}\n**PROMPT_TEMPLATE**:\n${CONFIG.MOD2.PROMPT("[特征包裹]", "[竞品素材]", "[词库数据]")}\n\n`;
+                content += `## 6. 模块三 (视觉图需)\n**SYSTEM**:\n${CONFIG.MOD3.SYSTEM}\n**PROMPT_TEMPLATE**:\n${CONFIG.MOD3.PROMPT("[初始化包裹]")}\n\n`;
+                content += `## 7. 模块四 (Ai 垫图)\n**SYSTEM**:\n${CONFIG.MOD4.SYSTEM}\n**PROMPT_TEMPLATE**:\n${CONFIG.MOD4.PROMPT("[初始化包裹]")}\n\n`;
+                content += `## 8. 模块五 (QA 矩阵)\n**SYSTEM**:\n${CONFIG.MOD5.SYSTEM}\n**PROMPT_TEMPLATE**:\n${CONFIG.MOD5.PROMPT("[特征包裹]", "[偏好]")}\n\n`;
+                content += `## 9. 模块六 (视频脚本)\n**SYSTEM**:\n${CONFIG.MOD6.SYSTEM}\n**PROMPT_TEMPLATE**:\n${CONFIG.MOD6.PROMPT("[特征包裹]")}\n\n`;
+                content += `## 10. 老品优化模块 (数据解析)\n**SYSTEM**:\n${CONFIG.OLD_MOD1.SYSTEM}\n**PROMPT_TEMPLATE**:\n${CONFIG.OLD_MOD1.PROMPT("[旧文案]", "[数据表]", "[视觉包]")}\n`;
+                content += `## 11. 老品优化模块 (图片优化)\n**SYSTEM**:\n${CONFIG.OLD_MOD2.SYSTEM}\n**PROMPT_TEMPLATE**:\n${CONFIG.OLD_MOD2.PROMPT("[优化方向]")}\n`;
+                saveAs(new Blob([content], { type: 'text/markdown' }), "A10_BLUEPRINT_V5.57.md");
+                showToast("全量底层指令蓝图导出成功");
+            }
+        }
+
+        function executeDataExport() {
+            const type = document.getElementById('unified-export-type').value;
+            if (type === 'excel') {
+                try {
+                    const wb = XLSX.utils.book_new();
+                    const tables = document.querySelectorAll('.markdown-body table');
+                    if(tables.length === 0) return showToast("无表格数据可导出");
+                    tables.forEach((table, idx) => {
+                        const cleanTable = table.cloneNode(true);
+                        cleanTable.querySelectorAll('td').forEach(td => { if(td.querySelector('button')) td.remove(); });
+                        cleanTable.querySelectorAll('th').forEach(th => { if(th.innerText.includes('执行操作')) th.remove(); });
+                        XLSX.utils.book_append_sheet(wb, XLSX.utils.table_to_sheet(cleanTable), `Sheet_${idx+1}`);
+                    });
+                    const sku = document.getElementById('m1-vars').value.match(/SKU[:：\s]*([A-Za-z0-9_-]+)/i)?.[1] || "AMZ_Data";
+                    XLSX.writeFile(wb, `${sku}_全维数据表.xlsx`);
+                    showToast("Excel 导出完成");
+                } catch(e) { showToast("导出异常"); }
+            } else if (type === 'ppt') {
+                if (typeof pptxgen === 'undefined') return showToast("PPT 引擎未加载");
+                showToast("PPT 导出中...");
+                let pptx = new pptxgen();
+                const sku = document.getElementById('m1-vars').value.match(/SKU[:：\s]*([A-Za-z0-9_-]+)/i)?.[1] || "产品全案";
+                let slide = pptx.addSlide();
+                slide.background = { color: "F5F5F7" };
+                slide.addText(`智控全案诊断优化报告`, { x: 1, y: 1.5, w: 8, fontSize: 40, bold: true, align: 'center', color: "1d1d1f" });
+                pptx.writeFile({ fileName: `${sku}_全案报告.pptx` }).then(() => showToast("PPT 导出成功"));
+            }
+        }
+
+        async function downloadAllImages() {
+            const imgNodes = document.getElementById('mod4-output').querySelectorAll('.preview-img:not(.hidden)');
+            if(imgNodes.length === 0) return showToast("暂无已生成的图片可以保存");
+            imgNodes.forEach((img, index) => {
+                setTimeout(() => {
+                    const a = document.createElement('a'); a.href = img.src; a.download = `Generated_${index}.png`;
+                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                }, index * 400); 
+            });
+        }
+
+        window.GeekMatrixEngine = (function() {
+            let canvas, ctx, w, h;
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,.<>/?awaitfetchDOMParserA9EngineAIModuleData'.split('');
+            let fontSize = 14;
+            let columns;
+            let drops = [];
+            let animationFrame;
+            let activeTasks = 0;
+            let isPlaying = false;
+
+            function init() {
+                canvas = document.getElementById('matrix-canvas');
+                if(!canvas) return;
+                ctx = canvas.getContext('2d');
+                resize();
+                window.addEventListener('resize', resize);
+            }
+
+            function resize() {
+                w = canvas.width = window.innerWidth;
+                h = canvas.height = window.innerHeight;
+                columns = Math.floor(w / fontSize);
+                drops = [];
+                for(let x = 0; x < columns; x++) drops[x] = Math.random() * -100;
+            }
+
+            function draw() {
+                if(!isPlaying) return;
+                
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                ctx.fillStyle = isDark ? 'rgba(0, 0, 0, 0.08)' : 'rgba(245, 245, 247, 0.08)';
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.font = fontSize + 'px monospace';
+                
+                for(let i = 0; i < drops.length; i++) {
+                    const text = chars[Math.floor(Math.random() * chars.length)];
+                    
+                    ctx.fillStyle = isDark ? '#10b981' : '#059669'; 
+                    if (Math.random() > 0.95) ctx.fillStyle = isDark ? '#ffffff' : '#111827';
+                    
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                    if(drops[i] * fontSize > h && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+                animationFrame = requestAnimationFrame(draw);
+            }
+
+            if(document.readyState === 'complete') init();
+            else window.addEventListener('DOMContentLoaded', init);
+
+            return {
+                start: () => {
+                    activeTasks++;
+                    if(activeTasks === 1) {
+                        if(!canvas) init();
+                        canvas.classList.remove('opacity-0');
+                        canvas.classList.add('opacity-100'); 
+                        if(!isPlaying) {
+                            isPlaying = true;
+                            draw();
+                        }
+                    }
+                },
+                stop: () => {
+                    activeTasks = Math.max(0, activeTasks - 1);
+                    if(activeTasks === 0) {
+                        canvas.classList.remove('opacity-100');
+                        canvas.classList.add('opacity-0'); 
+                        setTimeout(() => {
+                            if(activeTasks === 0) {
+                                isPlaying = false;
+                                cancelAnimationFrame(animationFrame);
+                            }
+                        }, 1000);
+                    }
+                }
+            };
+        })();
+
+        // 注册事件并修复工具方法
+        function openImageModal(s) { const m = document.getElementById('image-modal'); const img = document.getElementById('image-modal-content'); img.src = s; m.classList.remove('hidden'); setTimeout(() => m.style.opacity = '1', 10); }
+        function closeImageModal() { const m = document.getElementById('image-modal'); m.style.opacity = '0'; setTimeout(() => m.classList.add('hidden'), 300); }
+        function updateClock() { const c = document.getElementById('sys-clock'); if(c) c.innerText = new Date().toLocaleString('zh-CN', {hour12:false}); }
+        function toggleTheme() { document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+        function trackLogistics() { const u = document.getElementById('logistics-provider').value; const n = document.getElementById('logistics-number').value.trim(); if(n) window.open(u.includes('numbers=') ? u + n : u, '_blank'); }
+
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
