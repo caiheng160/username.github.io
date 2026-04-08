@@ -932,54 +932,44 @@ input[type=range].om2-slider::-webkit-slider-thumb {
     import { initializeApp } from "@firebase/app";
     import { getVertexAI, getGenerativeModel } from "@firebase/vertexai-preview";
 
-    // 1. 🚀 您的专属 Firebase 配置 (已自动填入)
     const firebaseConfig = {
-      apiKey: "AIzaSyD7IKtxe_PYfNFtJF3BTdGg-cILtkHAQuc",
-      authDomain: "ai-optimizer.firebaseapp.com",
-      projectId: "amazon-ai-optimizer",
-      storageBucket: "amazon-ai-optimizer.firebasestorage.app",
-      messagingSenderId: "52888452274",
-      appId: "1:52888452274:web:0e119983413501f76e5dab",
-      measurementId: "G-8HC3FWRPL6"
+        apiKey: "AIzaSyD7IKtxe_PYfNFtJF3BTdGg-cILtkHAQuc",
+        authDomain: "ai-optimizer.firebaseapp.com",
+        projectId: "amazon-ai-optimizer",
+        storageBucket: "amazon-ai-optimizer.firebasestorage.app",
+        messagingSenderId: "52888452274",
+        appId: "1:52888452274:web:0e119983413501f76e5dab",
+        measurementId: "G-8HC3FWRPL6"
     };
 
-    // 2. 初始化 Firebase 与 Vertex AI 服务
-    const app = initializeApp(firebaseConfig);
-    const vertexAI = getVertexAI(app);
+    try {
+        const app = initializeApp(firebaseConfig);
+        const vertexAI = getVertexAI(app);
 
-    // 3. 重写全局 fetchAI 函数 (将接管后续所有业务模块的请求)
-    window.fetchAI = async function(parts, sys, isImageGen = false) {
-        // 选择模型：Vertex 目前推荐 Gemini 1.5 Pro (生图/视觉) 和 Flash (文本)
-        const modelName = isImageGen ? "gemini-1.5-pro-preview-0409" : "gemini-1.5-flash"; 
-        
-        const modelInit = { 
-            model: modelName,
-            systemInstruction: sys ? { role: "system", parts: [{ text: sys }] } : undefined
-        };
-        
-        const model = getGenerativeModel(vertexAI, modelInit);
-        
-        const request = {
-            contents: [{ role: "user", parts: parts }]
-        };
+        // 将真实逻辑挂载到内部变量
+        window.__realFetchAI = async function(parts, sys, isImageGen = false) {
+            const modelName = isImageGen ? "gemini-1.5-pro-preview-0409" : "gemini-1.5-flash"; 
+            const modelInit = { 
+                model: modelName,
+                systemInstruction: sys ? { role: "system", parts: [{ text: sys }] } : undefined
+            };
+            const model = getGenerativeModel(vertexAI, modelInit);
+            const request = { contents: [{ role: "user", parts: parts }] };
 
-        try {
             const result = await model.generateContent(request);
             const response = await result.response;
-            
-            // 为了完美兼容老业务代码，将返回值包装为原来的结构
             return {
                 candidates: [{
-                    content: {
-                        parts: [{ text: response.text() }]
-                    }
+                    content: { parts: [{ text: response.text() }] }
                 }]
             };
-        } catch (error) {
-            console.error("Firebase Vertex AI 通信异常:", error);
-            throw error;
-        }
-    };
+        };
+
+        window.__vertex_ready = true;
+        console.log("✅ Vertex AI for Firebase 引擎已就绪");
+    } catch (e) {
+        console.error("❌ Firebase 初始化失败:", e);
+    }
 </script>
    <script id="main-app-logic">
         const apiKey = "";
