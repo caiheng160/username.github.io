@@ -928,10 +928,12 @@ input[type=range].om2-slider::-webkit-slider-thumb {
             </div>
         </div>
     </main>
+<!-- 2. 异步加载 Firebase 11.x 模块引擎 -->
 <script type="module">
-    import { initializeApp } from "@firebase/app";
-    import { getVertexAI, getGenerativeModel } from "@firebase/vertexai-preview";
+    import { initializeApp } from "firebase/app";
+    import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
 
+    // 🚀 您的专属 Firebase 配置
     const firebaseConfig = {
         apiKey: "AIzaSyD7IKtxe_PYfNFtJF3BTdGg-cILtkHAQuc",
         authDomain: "ai-optimizer.firebaseapp.com",
@@ -946,18 +948,23 @@ input[type=range].om2-slider::-webkit-slider-thumb {
         const app = initializeApp(firebaseConfig);
         const vertexAI = getVertexAI(app);
 
-        // 将真实逻辑挂载到内部变量
+        // 将真实逻辑挂载至调度器
         window.__realFetchAI = async function(parts, sys, isImageGen = false) {
-            const modelName = isImageGen ? "gemini-1.5-pro-preview-0409" : "gemini-1.5-flash"; 
+            // 注意：Vertex AI for Firebase 中模型名称不带路径前缀
+            const modelName = isImageGen ? "gemini-1.5-flash" : "gemini-1.5-flash"; 
+            
             const modelInit = { 
                 model: modelName,
                 systemInstruction: sys ? { role: "system", parts: [{ text: sys }] } : undefined
             };
+            
             const model = getGenerativeModel(vertexAI, modelInit);
             const request = { contents: [{ role: "user", parts: parts }] };
 
             const result = await model.generateContent(request);
             const response = await result.response;
+            
+            // 数据结构伪装，完美适配原有业务代码
             return {
                 candidates: [{
                     content: { parts: [{ text: response.text() }] }
@@ -966,7 +973,7 @@ input[type=range].om2-slider::-webkit-slider-thumb {
         };
 
         window.__vertex_ready = true;
-        console.log("✅ Vertex AI for Firebase 引擎已就绪");
+        console.log("✅ Vertex AI for Firebase 11.x 引擎已就绪");
     } catch (e) {
         console.error("❌ Firebase 初始化失败:", e);
     }
