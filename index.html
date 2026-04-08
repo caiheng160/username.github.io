@@ -928,12 +928,37 @@ input[type=range].om2-slider::-webkit-slider-thumb {
             </div>
         </div>
     </main>
-<!-- 2. 异步加载 Firebase 11.x 模块引擎 -->
-<script type="module">
-    import { initializeApp } from "firebase/app";
-    import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
+<!-- 1. 声明全局调度器，确保主逻辑调用时引擎已挂载 -->
+<script>
+    window.__vertex_ready = false;
+    window.fetchAI = function() {
+        const args = arguments;
+        return new Promise((resolve, reject) => {
+            const check = setInterval(() => {
+                if (window.__vertex_ready && typeof window.__realFetchAI === 'function') {
+                    clearInterval(check);
+                    window.__realFetchAI(...args).then(resolve).catch(reject);
+                }
+            }, 100);
+            // 30秒超时处理
+            setTimeout(() => { 
+                clearInterval(check); 
+                if(!window.__vertex_ready) {
+                    console.error("❌ Vertex AI 引擎加载超时，请检查 Firebase 控制台是否开启了相关服务");
+                    reject(new Error("Vertex AI 引擎加载超时")); 
+                }
+            }, 30000);
+        });
+    };
+</script>
 
-    // 🚀 您的专属 Firebase 配置
+<!-- 2. 使用全路径 URL 异步加载 Firebase 11.x 模块 -->
+<script type="module">
+    // 🚀 核心修复：直接使用 HTTPS 路径，彻底解决模块解析错误
+    import { initializeApp } from "[https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js](https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js)";
+    import { getVertexAI, getGenerativeModel } from "[https://www.gstatic.com/firebasejs/11.0.1/firebase-vertexai.js](https://www.gstatic.com/firebasejs/11.0.1/firebase-vertexai.js)";
+
+    // 🚀 注入您的专属 Firebase 配置
     const firebaseConfig = {
         apiKey: "AIzaSyD7IKtxe_PYfNFtJF3BTdGg-cILtkHAQuc",
         authDomain: "ai-optimizer.firebaseapp.com",
@@ -964,7 +989,7 @@ input[type=range].om2-slider::-webkit-slider-thumb {
             const result = await model.generateContent(request);
             const response = await result.response;
             
-            // 数据结构伪装，完美适配原有业务代码
+            // 数据结构伪装，完美适配原有业务代码格式
             return {
                 candidates: [{
                     content: { parts: [{ text: response.text() }] }
@@ -973,9 +998,9 @@ input[type=range].om2-slider::-webkit-slider-thumb {
         };
 
         window.__vertex_ready = true;
-        console.log("✅ Vertex AI for Firebase 11.x 引擎已就绪");
+        console.log("✅ Vertex AI for Firebase 11.x 全路径引擎已就绪");
     } catch (e) {
-        console.error("❌ Firebase 初始化失败:", e);
+        console.error("❌ Firebase 初始化失败，请检查 GCP 计费是否已开启（需 Blaze 计划）:", e);
     }
 </script>
    <script id="main-app-logic">
