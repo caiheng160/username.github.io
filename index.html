@@ -308,6 +308,14 @@ input[type=range].om2-slider::-webkit-slider-thumb {
             background: var(--color-blue); 
         }
     </style>
+    <script type="importmap">
+  {
+    "imports": {
+      "@firebase/app": "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js",
+      "@firebase/vertexai-preview": "https://www.gstatic.com/firebasejs/10.11.0/firebase-vertexai-preview.js"
+    }
+  }
+</script>
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative">
 
@@ -920,7 +928,59 @@ input[type=range].om2-slider::-webkit-slider-thumb {
             </div>
         </div>
     </main>
+<script type="module">
+    import { initializeApp } from "@firebase/app";
+    import { getVertexAI, getGenerativeModel } from "@firebase/vertexai-preview";
 
+    // 1. 🚀 您的专属 Firebase 配置 (已自动填入)
+    const firebaseConfig = {
+      apiKey: "AIzaSyD7IKtxe_PYfNFtJF3BTdGg-cILtkHAQuc",
+      authDomain: "ai-optimizer.firebaseapp.com",
+      projectId: "amazon-ai-optimizer",
+      storageBucket: "amazon-ai-optimizer.firebasestorage.app",
+      messagingSenderId: "52888452274",
+      appId: "1:52888452274:web:0e119983413501f76e5dab",
+      measurementId: "G-8HC3FWRPL6"
+    };
+
+    // 2. 初始化 Firebase 与 Vertex AI 服务
+    const app = initializeApp(firebaseConfig);
+    const vertexAI = getVertexAI(app);
+
+    // 3. 重写全局 fetchAI 函数 (将接管后续所有业务模块的请求)
+    window.fetchAI = async function(parts, sys, isImageGen = false) {
+        // 选择模型：Vertex 目前推荐 Gemini 1.5 Pro (生图/视觉) 和 Flash (文本)
+        const modelName = isImageGen ? "gemini-1.5-pro-preview-0409" : "gemini-1.5-flash"; 
+        
+        const modelInit = { 
+            model: modelName,
+            systemInstruction: sys ? { role: "system", parts: [{ text: sys }] } : undefined
+        };
+        
+        const model = getGenerativeModel(vertexAI, modelInit);
+        
+        const request = {
+            contents: [{ role: "user", parts: parts }]
+        };
+
+        try {
+            const result = await model.generateContent(request);
+            const response = await result.response;
+            
+            // 为了完美兼容老业务代码，将返回值包装为原来的结构
+            return {
+                candidates: [{
+                    content: {
+                        parts: [{ text: response.text() }]
+                    }
+                }]
+            };
+        } catch (error) {
+            console.error("Firebase Vertex AI 通信异常:", error);
+            throw error;
+        }
+    };
+</script>
    <script id="main-app-logic">
         const apiKey = "";
         let excelCsvData = "";
@@ -1541,29 +1601,7 @@ window.addEventListener('DOMContentLoaded', initAdminEditor);
 
       
 
-        /* ==================== 核心通信与重试逻辑 ==================== */
-        async function fetchWithRetry(modelName, payload, retries = 5) {
-            const apiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${window.getActiveApiKey()}`;
-            const delays = [1000, 2000, 4000, 8000, 16000];
-            for (let i = 0; i < retries; i++) {
-                try {
-                    const res = await fetch(apiEndpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return await res.json();
-                } catch (err) {
-                    if (i === retries - 1) throw err;
-                    await new Promise(r => setTimeout(r, delays[i]));
-                }
-            }
-        }
-
-        async function fetchAI(parts, sys, isImageGen = false) {
-            const modelName = isImageGen ? "gemini-2.5-flash-image-preview" : "gemini-2.5-flash-preview-09-2025";
-            const payload = { contents: [{ parts }], systemInstruction: { parts: [{ text: sys }] } };
-            if (isImageGen) payload.generationConfig = { responseModalities: ["TEXT", "IMAGE"] };
-            return await fetchWithRetry(modelName, payload);
-        }
-
+      
         /* ==================== 补全的工具函数 ==================== */
         function injectTableCopyButtons(containerId) {
             const container = document.getElementById(containerId);
